@@ -1,0 +1,35 @@
+ function bindTable() {
+        $.ajax({
+            url:'../Home/ShwList',
+            method:'get',
+            success: function (data) {
+    ===========================================================            
+              var table = '';
+               for (i = 0; i < data.length; i++) {
+                   var row = '<tr>'
+                   row += '<td>' + data[i].name + '</td>'
+                   row += '<td>' + data[i].age + '</td>'
+                   row += '<td>' + data[i].city + '</td>'
+                   row += '</tr>'
+                   table += row;
+               }
+                $('#tbId').html(table);
+================================================================================
+                $("#tbId").find("tr:gt(0)").remove();
+               for (i = 0; i < data.length; i++) {
+                   $('#tbId').append('<tr><td>' + data[i].name + '</td> <td>' + data[i].age + '</td> <td>'+data[i].city+'</td></tr>')
+               }
+
+=========== ======================================================     
+                var row = '';
+                 for (i = 0; i < data.length; i++) {
+                    row  += '<tr><td>' + data[i].name + '</td> <td>' + data[i].age + '</td> <td>' + data[i].city + '</td> </tr>'
+                }
+                $('#tbId').html(row);
+
+           },
+            error:function () {
+                alert("fail table");
+            }
+        });
+    }
