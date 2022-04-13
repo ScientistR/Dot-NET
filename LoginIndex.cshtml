@@ -1,0 +1,73 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+}
+
+<script >
+    var app = angular.module("MyApp", []);
+    app.controller("ctrl", function ($scope, $http,$window) {
+
+        // $scope.show = function () {
+        // alert("show");
+        //    // $http.get("https://localhost:44368/Loing/showData").then(function (response) {
+
+        //     $http({
+        //         method:'get',
+        //         url:'https://localhost:44368/Loing/showData'
+
+        //     }).then(function (response) {
+
+               
+                
+        //    $scope.result = response.data;//data is defaine data 
+        //       },
+        //    function (error) {
+        //        alert("fail found Service");
+        //         });//fun & then
+        //}//show fun
+
+//----------Insert----------------//
+
+       
+        $scope.Login = function () {
+            alert("servic Login");
+             var admin = {
+            UserName: $scope.username,
+            Password: $scope.password
+        };
+
+             $http({
+                 method:'post',// 
+                 url:'../Loing/Login',
+                 data:admin 
+               
+             }).then(function (result) {
+                    alert("Pass Login=");
+                       var UserID = result.data
+                         $scope.username = "";
+                         $scope.password = "";
+                       
+                 var ID=UserID[0].ID
+                 $scope.AdminId = UserID[0].ID
+                 var url = "../Desbord/DesbordView?name=" + encodeURIComponent($scope.AdminId);
+                  $window.location.href = url;      
+               },
+            function (response) {
+            alert("fail found Service")
+                 });//fun & then
+    }//show fun
+ });
+</script>
+<div>
+    {{2+2}}
+    Login AdminId= {{AdminId}}
+
+    <h2>Sing up</h2>
+
+    <table>
+        <tr><td>Username</td> <td><input type="text" id="txtusername" ng-model="username" /></td></tr>
+        <tr><td>Password</td> <td><input type="text" id="txtPassword" ng-model="password" /></td></tr>
+    </table>
+
+    <button id="save" ng-click="Login()">Login</button>
+</div>

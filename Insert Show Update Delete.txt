@@ -1,0 +1,59 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace app3220
+{
+    public partial class Employee : System.Web.UI.Page
+    {
+        db3220Entities db = new db3220Entities();
+        Emp obj = new Emp();
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                BindData();
+            }
+        }
+
+        public void BindData()
+        {
+            //var data = db.Emps.ToList();
+            var data = db.usp_emp_get().ToList();
+            grd.DataSource = data;
+            grd.DataBind();
+        }
+
+        protected void btnsave_Click(object sender, EventArgs e)
+        {
+
+            //obj.name = txtname.Text;
+            //obj.address = txtaddress.Text;
+            //obj.age =Convert.ToInt32(txtage.Text);
+            //db.Emps.Add(obj);
+            //db.SaveChanges();
+            //BindData();
+
+            db.usp_emp_insert(txtname.Text, txtaddress.Text, Convert.ToInt32(txtage.Text));
+            db.SaveChanges();
+            BindData();
+        }
+
+        protected void grd_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            //int IDD = Convert.ToInt32(e.CommandArgument);
+            //var data = db.Emps.Find(IDD);
+            //db.Emps.Remove(data);
+            //db.SaveChanges();
+            //BindData();
+
+            int IDD = Convert.ToInt32(e.CommandArgument);
+            db.usp_emp_delete(IDD);
+            db.SaveChanges();
+            BindData();
+        }
+    }
+}

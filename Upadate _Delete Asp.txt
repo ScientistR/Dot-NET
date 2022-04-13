@@ -1,0 +1,158 @@
+using System;
+using System.Collections.Generic;
+
+using System.Linq;
+using System.Web;
+
+using System.Web.UI;
+
+using System.Web.UI.WebControls;
+
+
+
+namespace Entity17419
+
+{
+  
+  public partial class Employee : System.Web.UI.Page
+   
+ {
+        
+	Entity17419Entities _db = new Entity17419Entities();
+       
+	 Emp _emp = new Emp();
+        
+
+protected void Page_Load(object sender, EventArgs e)
+       
+ {
+            
+	if (!IsPostBack)
+            
+	{
+                
+	Display();
+            
+	}
+        
+}
+        
+
+public void Display()
+        
+{
+            
+	//var p = _db.Emps.ToList();
+            
+	var p = (from a in _db.Emps select a).ToList();
+            
+	if (p.Count > 0)
+            
+	{
+                
+	grd.DataSource = p;
+                
+	grd.DataBind();
+            
+	}
+            
+	else
+            
+	{
+                
+	grd.DataSource = null;
+                
+	grd.DataBind();
+            
+	}
+        
+  }
+  
+      
+protected void btnsave_Click(object sender, EventArgs e)
+        
+{
+            
+	_emp.name = txtname.Text;
+            
+	_emp.address = txtaddress.Text;
+            
+	_emp.age = Convert.ToInt32(txtage.Text);
+
+            
+	if (btnsave.Text == "Save")
+            
+	{
+                
+	_db.Emps.Add(_emp);
+            
+	}
+            
+	else
+            
+	{
+                
+	_emp.empid = Convert.ToInt32(ViewState["pp"]);
+                
+	_db.Entry(_emp).State = System.Data.EntityState.Modified;
+            
+	}
+            
+	_db.SaveChanges();
+            
+	Display();
+
+        
+	}
+
+       
+
+ protected void grd_RowCommand(object sender, GridViewCommandEventArgs e)
+        
+ {
+            
+ 	int IDD = Convert.ToInt32(e.CommandArgument);
+           
+	 if (e.CommandName == "A")
+           
+	 {
+               
+	 var p = (from a in _db.Emps where a.empid == IDD select a).ToList();
+
+               
+ 	if (p.Count > 0)
+               
+ 	{
+                  
+ 	txtname.Text = p[0].name;
+                   
+ 	txtaddress.Text = p[0].address;
+                  
+ 	txtage.Text = p[0].age.ToString();
+                  
+  	btnsave.Text = "Update";
+                  
+  	ViewState["pp"] = IDD;
+              
+  	}
+            
+}
+           
+
+ 	else if (e.CommandName == "B")
+           
+ 	{
+               
+	var p = _db.Emps.Find(IDD);
+               
+	_db.Emps.Remove(p);
+                
+	_db.SaveChanges();
+               
+ 	Display();
+            
+}
+        
+}
+ }
+}
