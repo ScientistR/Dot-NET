@@ -1,0 +1,68 @@
+
+using WebApplication6Angular.Model;
+
+namespace WebApplication6Angular.Controllers
+{
+    [Route("[controller]")]
+    [ApiController]
+    public class EmpController : ControllerBase
+    {
+        //  MyDataBase DB = new MyDataBase(); ye b likh sakte the ,"private readonly MyDataBase _dB" k badale m
+        private readonly MyDataBase _dB;
+
+        public EmpController(MyDataBase DB)
+        {
+            _dB = DB;
+        }
+
+        [HttpGet]
+        public ActionResult<List<employee>> Get()
+        {
+
+            return Ok(_dB.employees.ToList());
+        }
+
+        [Route("{id}")]
+        [HttpGet]
+        public ActionResult<employee> Get(int eid)// record fetch by id 
+        {
+
+            var data= _dB.employees.FirstOrDefault(a => a.id==eid);
+            return Ok(data);
+        }
+
+        [HttpPost]
+        public ActionResult<employee> Post(employee emp)
+        {
+
+            _dB.employees.Add(emp);
+            _dB.SaveChanges();
+            return Ok(emp);
+        }
+
+
+        [HttpPut]
+        public ActionResult<employee> Put(employee emp)
+        {
+            var EmpData = _dB.employees.FirstOrDefault(a => a.id == emp.id);
+            EmpData.name = emp.name;
+            EmpData.pass = emp.pass;
+            EmpData.email = emp.email;
+            _dB.SaveChanges();
+            return Ok(emp);
+
+        }
+
+ 	[Route("{id}")]
+        [HttpDelete]
+        public ActionResult<employee> Delete(int id)
+        {
+
+            var data = _dB.employees.FirstOrDefault(a => a.id == id);
+            _dB.Remove(data);
+            _dB.SaveChanges();
+            return Ok(data);
+        }
+
+    }
+}

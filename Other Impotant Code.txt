@@ -1,0 +1,66 @@
+*****//In Startup.cs file //Configration of path
+
+public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllers().AddNewtonsoftJson();
+            services.AddDbContext<MyDataBase>(options => options.UseSqlServer(Configuration.GetConnectionString("MyDataBase")));
+          //services.AddDbContext<MyDataBase>(options => options.UseSqlServer(Configuration.GetConnectionString("MyDataBase")));
+
+            services.AddControllers();
+        }
+------------------------------------------------------------------
+*****//In asppSeting file //make Connection from database
+
+ "ConnectionStrings": {
+    //"MyDataBase": "Server=APPLE\\SQLEXPRESS;Database=AngularDatabse3; Trusted_Connection=True" // create new database with table of model class
+    "MyDataBase": "Server=APPLE\\SQLEXPRESS;Database=AngularDatabse; Trusted_Connection=True"    // table of model class in exits database
+
+  },
+-------------------------------------------------------------------
+****//Install Packeges
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0-preview.7.20365.15" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.0-preview.7.20365.15" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.0-preview.7.20365.15" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.0-preview.7.20365.15">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.3" />
+  </ItemGroup>
+--------------------------------------------------------------------
+*****// create DBContext class in model folder
+
+using Microsoft.EntityFrameworkCore;
+
+namespace WebApplication6Angular.Model
+{
+    public class MyDataBase :DbContext   
+    {
+        public MyDataBase(DbContextOptions options):base(options)
+        { 
+        
+        }
+        public DbSet<employee> employees { get; set; }
+    }
+}
+------------------------------------------------------------------
+*****// create modle class(property)
+
+namespace WebApplication6Angular.Model
+{
+    public class employee
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string email { get; set; }
+        public string pass { get; set; }
+    }
+}
+----------------------------------------------
+*****Command for creating database 
+1.  add-migration initialCreate 
+
+2. update-database

@@ -1,0 +1,117 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using Newtonsoft.Json;
+
+namespace Test_12_4_19.Controllers
+{
+    public class EmployeeController : Controller
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["zxc"].ConnectionString);
+        // GET: Employee
+        [HttpGet]
+        public ActionResult insert()
+        {
+            return View();
+        }
+        //[HttpPost]
+        public void InsertData(string A, string B, int G)
+        {
+            con.Open();
+            SqlCommand cmd = new SqlCommand("usp_emp_inseert", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@name", A);
+            cmd.Parameters.AddWithValue("@city", B);
+            cmd.Parameters.AddWithValue("@crty", G);
+            cmd.ExecuteNonQuery();
+            con.Close();
+
+        }
+        //[HttpPost]
+        public ActionResult showData()//   JsonResult
+        {
+            string p = "";
+            con.Open();
+            SqlCommand cmd = new SqlCommand("usp_epm_show", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlDataAdapter dt = new SqlDataAdapter(cmd);
+            DataSet ds = new DataSet();
+            dt.Fill(ds);
+            con.Close();
+            if (ds.Tables[0].Rows.Count>0)
+            {
+                p = JsonConvert.SerializeObject(ds.Tables[0]);
+            }
+            
+            return Json(p, JsonRequestBehavior.AllowGet);
+        }
+
+        public void deleleData(int E)
+        {
+            con.Open();
+            SqlCommand cmd = new SqlCommand("usp_epm_delete", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@a",E);
+            cmd.ExecuteNonQuery();
+            con.Close();
+        }
+
+        public ActionResult EditData(int Edit_ID)
+        {
+            string p = "";
+            con.Open();
+            SqlCommand cmd = new SqlCommand("usp_edit_select", con); //yaha select ki query chalai h where k sath update ki nhi
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@id", Edit_ID);
+            SqlDataAdapter dt = new SqlDataAdapter(cmd);
+            DataSet ds = new DataSet();
+            dt.Fill(ds);
+            con.Close();
+            if (ds.Tables[0].Rows.Count>0)
+            {
+               p= JsonConvert.SerializeObject(ds.Tables[0]);
+            }
+            return Json(p,JsonRequestBehavior.AllowGet);
+        }
+
+        public void upadeData(string A, string B, int C, int D)
+        {
+            con.Open();
+            SqlCommand cmd = new SqlCommand("usp_emp_upadate", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@name", A);
+            cmd.Parameters.AddWithValue("@city", B);
+            cmd.Parameters.AddWithValue("@count", D);
+            cmd.Parameters.AddWithValue("@id", C);
+            cmd.ExecuteNonQuery();
+            con.Close();
+        }
+        public JsonResult getCont()
+        {
+            string p = "";
+            con.Open();
+            SqlCommand cmd = new SqlCommand("usp_country_select",con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlDataAdapter dt = new SqlDataAdapter(cmd);
+            DataSet ds = new DataSet();
+            dt.Fill(ds);
+            con.Close();
+            if (ds.Tables[0].Rows.Count>0)
+            {
+                p = JsonConvert.SerializeObject(ds.Tables[0]); 
+
+            }
+            return Json(p, JsonRequestBehavior.AllowGet);
+
+
+
+        }
+    }
+
+   
+}
