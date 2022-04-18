@@ -1,1 +1,9 @@
 
+ [Route("AddUpdateZipCode")]
+        [HttpPost]
+        public async Task<IActionResult> AddUpdateZipCode(ZipCodes zipCode) //AddBarCodeRequestModel addBarCodeRequestModel
+        {
+            CommonResponseModel responseModel = new();
+            responseModel = await _repoAdmin.AddUpdateZipCode(zipCode);
+            return Ok(responseModel);
+        }
