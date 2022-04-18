@@ -1,0 +1,149 @@
+====================DB Context Class==========================
+using Entities.Models;
+using Microsoft.EntityFrameworkCore;
+namespace Entities
+
+
+public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext>    options)
+        : base(options)
+    {
+    }
+
+    public DbSet<Employee> Employees { get; set; }
+    public DbSet<Department> Departments{ get; set; }
+
+
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
+	    base.OnModelCreating(modelBuilder);
+    
+	    // Code to seed data
+	}
+}
+============Connection String ===========================
+
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Warning"
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "mysqlconnection": {
+    "connectionString": "server=localhost;userid=root;password=yourpass;database=accountowner;"
+  },
+  "AllowedHosts": "*"
+}
+==============================ConfigureServices===========================================
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(Configuration.GetConnectionString("mysqlconnection")));
+
+    services.AddControllers();
+}
+
+
+===================I Repository  Interface  IEmployee =================================
+public interface IEmployeeRepository
+{
+    Task<IEnumerable<Employee>> GetEmployees();
+    Task<Employee> GetEmployee(int employeeId);
+    Task<Employee> AddEmployee(Employee employee);
+    Task<Employee> UpdateEmployee(Employee employee);
+    void DeleteEmployee(int employeeId);
+}
+
+========================== Repository  Employee=============================================
+using EmployeeManagement.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace EmployeeManagement.Api.Models
+{
+    public class EmployeeRepository : IEmployeeRepository
+    {
+        private readonly AppDbContext appDbContext;
+
+        public EmployeeRepository(AppDbContext appDbContext)
+        {
+            this.appDbContext = appDbContext;
+        }
+
+
+        public   async  Task<IEnumerable<Employee>> GetEmployees()
+        {
+ 
+         var data=   await     appDbContext.Employees.ToListAsync();
+ return data 
+        }
+
+        public async Task<Employee> GetEmployee(int employeeId)
+        {
+           
+           var data=    await appDbContext.Employees .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+	 return data 
+        }
+
+        public async Task<Employee> AddEmployee(Employee employee)
+        {
+            var result = await appDbContext.Employees.AddAsync(employee);
+            await appDbContext.SaveChangesAsync();
+            return result.Entity;
+        }
+
+        public async Task<Employee> UpdateEmployee(Employee employee)
+        {
+            var result = await appDbContext.Employees
+                .FirstOrDefaultAsync(e => e.EmployeeId == employee.EmployeeId);
+
+            if (result != null)
+            {
+                result.FirstName = employee.FirstName;
+                result.LastName = employee.LastName;
+                result.Email = employee.Email;
+                result.DateOfBrith = employee.DateOfBrith;
+                result.Gender = employee.Gender;
+                result.DepartmentId = employee.DepartmentId;
+                result.PhotoPath = employee.PhotoPath;
+
+                await appDbContext.SaveChangesAsync();
+
+                return result;
+            }
+
+            return null;
+        }
+
+        public async void DeleteEmployee(int employeeId)
+        {
+            var result = await appDbContext.Employees
+                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+            if (result != null)
+            {
+                appDbContext.Employees.Remove(result);
+                await appDbContext.SaveChangesAsync();
+            }
+        }
+    }
+}
+====================Startup fIle m ===============================
+public void ConfigureServices(IServiceCollection services)
+{
+    // Rest of the code
+    services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+    services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+}
+
+==========================Api  Controller =======================================
+
+ [HttpPost("ShopRegistration")]
+        public async Task<CommonResponse<ShopRegistration>> Registration(ShopRegistration objregister)
+        {
+
+
+ CommonResponse<ShopRegistration> objres = new CommonResponse<ShopRegistration>();
+ CommonResponse<ShopRegistration> objres = new ();
