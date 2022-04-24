@@ -1,0 +1,21 @@
+ var data   = (from item in db.Employees
+                            join rp in db.Report_Table on item.EID equals rp.EID
+                            where item.EID == id
+                            select new
+                            {
+                                item.Ename,
+                                item.EID,
+                                rp.CusName
+                            }).ToList();
+
+         // Dono m Common Honi chahiye ID 
+            var data2=(from item in db.Employees
+             //join rp in db.Report_Table on item.EID equals rp.EID
+             where item.EID != id
+             select new 
+             {
+                 item.Ename,
+                 item.EID,
+                 item.Adress
+             }).ToList();
+
