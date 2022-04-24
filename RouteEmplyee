@@ -19,8 +19,7 @@
                  item.Adress
              }).ToList();
              
-             ------------------------------------------====================================================
-              // Report_Table report_Table = db.Report_Table.Find(id);
+            // Report_Table report_Table = db.Report_Table.Find(id);
             var data = (from item in db.Employees
                         join rp in db.Report_Table on item.EID equals rp.EID
                         where rp.RId == id
@@ -39,6 +38,7 @@
             //fetch user roced who is not emplyee
             var EmpData = (from item in db.Employees
                            where item.EID != EmpID
-                           select item).ToList();
-           
-
+                           select new { 
+                           item.EID,
+                           item.Ename
+                           }).ToList();
