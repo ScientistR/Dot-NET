@@ -7,3 +7,36 @@
             responseModel = await _repoAdmin.AddUpdateZipCode(zipCode);
             return Ok(responseModel);
         }
+
+===================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.Models
+{
+   public class APIResponseModel
+    {
+        public int MessageCode { get; set; }
+        public string Message { get; set; }
+        public bool Status { get; set; }
+        public Object Data { get; set; }
+    }
+
+    public class CommonResponseModel
+    {
+        public string Message { get; set; }
+        public int StatusCode { get; set; }
+        public Object Data { get; set; }
+    }
+
+    public class CommonUserResponseModel
+    {
+        public string Message { get; set; }
+        public int StatusCode { get; set; }
+        public int TotalCount { get; set; }
+        public Object Data { get; set; }
+    }
+}
