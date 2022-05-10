@@ -1,0 +1,104 @@
+using FuelMuleFillUp.DAL.IDAL;
+using FuelMuleFillUp.Entities.Models;
+using FuelMuleFillUp.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using static FuelMuleFillUp.Utilities.Enums;
+
+namespace FuelMuleFillUp.DAL.DAL
+{
+    public class AdminDal : IAdminDal
+    {
+        //private readonly CustomerDal customerDal;
+        private readonly FuelMuleFillUpENRGQAContext _dbContext;
+        private readonly IGenericDAL<AspNetUser> userGenericDal;
+        public AdminDal(IGenericDAL<AspNetUser> userGenericDal, FuelMuleFillUpENRGQAContext _dbContext)
+        {
+            //this.customerDal = customerDal;
+            this.userGenericDal = userGenericDal;
+            this._dbContext = _dbContext;
+            //  var Route = Mapper.MapData<UserDto, AspNetUser>(user);
+        }
+
+        public async Task<List<AspNetUser>> GetEmployees(string role, int? userId)
+        {
+
+            var usersList = await _dbContext.AspNetUsers.Where(x => (role == null || x.Role.Name != role) && (userId == null || x.Id == userId)).ToListAsync();
+            return usersList;
+        }
+
+
+        public async Task<List<RouteDetail>> GetRoutes(int? routeId)
+        {
+
+            var routesList = await _dbContext.RouteDetails.Where(x => (routeId == null || x.Id == routeId) && !x.IsDeleted).Include(x => x.AspNetUsers).ThenInclude(x => x.Vehicles).ThenInclude(x=>x.AssignSubscriptions).ToListAsync();
+            return routesList;
+        }
+        public async Task<List<Product>> GetProduct(int? ProductId)
+        {
+            var productList = await _dbContext.Products.Where(x => (ProductId == 0 || x.Id == ProductId) && !x.IsDeleted).ToListAsync();
+            return productList;
+        }
+
+        public async Task<List<Faq>> GetFaqs()
+        {
+            return await _dbContext.Faqs.Include(x => x.FaqAnswers).ToListAsync();
+        }
+
+
+        /// <summary>
+        /// Get Truck
+        /// </summary>
+        /// <param name="truckId"></param>
+        /// <returns></returns>
+        public async Task<List<Truck>> GetTruck(int? truckId)
+        {
+
+            var truckList = await _dbContext.Trucks.Where(x => (truckId == null || x.TruckId == truckId) && !x.IsDeleted).ToListAsync();
+            return truckList;
+        }
+
+        // get Zip
+        public async Task<List<ZipCode>> GetZip(int? ZipId)
+        {
+
+            var zipList = await _dbContext.ZipCodes.Where(x => (ZipId == null || x.Id == ZipId)).ToListAsync();
+            return zipList;
+        }
+        public async Task<ZipCode> ZipCodeValidate(string zipCode)
+        {
+            var zipList = await _dbContext.ZipCodes.Where(x => x.Zip == zipCode).FirstOrDefaultAsync();
+            return zipList;
+        }
+
+        public async Task<List<SubscriptionPlan>> GetSubscription(int? subscriptionPlanId)
+        {
+            var SubcriptionList = await _dbContext.SubscriptionPlans.Where(x => x.DefaultPlan && !x.IsDeleted).ToListAsync();
+            return SubcriptionList;
+        }
+
+        public async Task<List<SubscriptionPlan>> GetSubscriptionByCustomerId(int customerId)
+        {
+            var SubcriptionList = await _dbContext.SubscriptionPlans.Where(x => x.CustomerId == customerId && !x.IsDeleted).ToListAsync();
+            return SubcriptionList;
+        }
+        public async Task<List<CustomerDelivery>> GetUpcomingDeliveries()
+        {
+            return await _dbContext.CustomerDeliveries.Where(x => x.DeliveryDate.Date >= DateTime.Now.Date).ToListAsync();
+        }
+        public async Task<List<States>> GetStates(int? stateId)
+        {
+            var stateList = await _dbContext.States.Where(x => (stateId == null || x.Id == stateId)).ToListAsync();
+            return stateList;
+        }
+        public int GetMaxSequenceNoFaq()
+        {
+            return _dbContext.Faqs.Where(x => !x.IsDeleted).Max(x => x.Seq);
+        }
+    }
+}
