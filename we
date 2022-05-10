@@ -1,0 +1,1217 @@
+using AutoMapper;
+using FuelMuleFillUp.BAL.IRepository;
+using FuelMuleFillUp.DAL.IDAL;
+using FuelMuleFillUp.Entities.Models;
+using FuelMuleFillUp.Models;
+using FuelMuleFillUp.Models.Models;
+using FuelMuleFillUp.Models.ResponseModel;
+using FuelMuleFillUp.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.BAL.Repository
+{
+    public class Admin : IAdmin
+    {
+
+        private readonly IAdminDal admin;
+        private readonly IMapper mapper;
+        private readonly IGenericDAL<RouteDetail> routeDetailGenericDal;
+        private readonly IGenericDAL<Product> productGenericDal;
+        private readonly IGenericDAL<Faq> faqGenericDal;
+        private readonly IGenericDAL<Truck> truckGenericDal;
+        private readonly IGenericDAL<ZipCode> zipGenericDal;
+        private readonly IGenericDAL<AspNetUser> userGenericDal;
+        private readonly IGenericDAL<SubscriptionPlan> subscripGenericDal;
+        private readonly IGenericDAL<CustomerDelivery> customerDelGenericDal;
+        private readonly IUserDal userDal;
+        public Admin(IAdminDal admin, IMapper mapper, IGenericDAL<RouteDetail> routeDetailGenericDal, IGenericDAL<Product> productGenericDal
+            , IGenericDAL<Faq> faqGenericDal, IGenericDAL<Truck> truckGenericDal, IGenericDAL<ZipCode> zipGenericDal, IGenericDAL<AspNetUser> userGenericDal
+            , IGenericDAL<SubscriptionPlan> subscripGenericDal, IUserDal userDal, IGenericDAL<CustomerDelivery> customerDelGenericDal)
+        {
+            this.admin = admin;
+            this.mapper = mapper;
+            this.routeDetailGenericDal = routeDetailGenericDal;
+            this.productGenericDal = productGenericDal;
+            this.faqGenericDal = faqGenericDal;
+            this.truckGenericDal = truckGenericDal;
+            this.zipGenericDal = zipGenericDal;
+            this.subscripGenericDal = subscripGenericDal;
+            this.userGenericDal = userGenericDal;
+            this.userDal = userDal;
+            this.customerDelGenericDal = customerDelGenericDal;
+        }
+
+        public UtilityFunction utility;
+
+        /// <summary>
+        /// Get employees - user list without customer
+        /// </summary>
+        /// <param name="role"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetEmployees(string role, int? userId)
+        {
+            utility = new UtilityFunction();
+            CommonResponseModel response = new();
+            try
+            {
+               
+                var usersList = await admin.GetEmployees(role, userId);
+                if (usersList !=null) {
+                    response.Data = usersList;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.GetData;
+                } 
+                else {
+
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+               
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message =ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Get Route(s)
+        /// </summary>
+        /// <param name="routeId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetRoutes(int? routeId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var routes = await admin.GetRoutes(routeId);
+                if (routes != null)
+                {
+                    var routesList = mapper.Map<List<RouteDetailDto>>(routes);
+               
+                    response.Data = routesList;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.GetData;
+                } else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+               
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// User Registration - save user - customer, employee and driver
+        /// </summary>
+        /// <param name="route"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> AddUpdateRoute(RouteDetailDto route)
+        {
+            utility = new UtilityFunction();
+            CommonResponseModel response = new();
+            try
+            {
+                var routeEntity = mapper.Map<RouteDetail>(route);
+                await routeDetailGenericDal.Save(routeEntity);
+                response.Data = routeEntity.Id;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.GetData;
+              
+            }
+            catch(Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Dete route
+        /// </summary>
+        /// <param name="routeId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> DeleteRoute(int routeId)
+        {
+            CommonResponseModel response = new();
+            var routes = await admin.GetRoutes(routeId);
+            try
+            {
+                if (routes != null && routes.Count > 0)
+                {
+                    var route = routes.FirstOrDefault();
+                    route.IsDeleted = true;
+                    await routeDetailGenericDal.Save(route);
+
+                    response.Data = true;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.DeleteRecord;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Add and update product
+        /// </summary>
+        /// <param name="product"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> AddUpdateProduct(ProductDto product)
+        {
+            utility = new UtilityFunction();
+            CommonResponseModel response = new();
+            try
+            {
+                product.CreatedBy = 1;
+                var productEntity = mapper.Map<Product>(product);
+                await productGenericDal.Save(productEntity);
+                response.Data = productEntity.Id;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.AddUpdate;
+            }
+            catch(Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Delete Product
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> DeleteProduct(int productId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var products = await admin.GetProduct(productId);
+                if (products != null && products.Count > 0)
+                {
+                    var product = products.FirstOrDefault();
+                    product.IsDeleted = true;
+                    await productGenericDal.Save(product);
+                    response.Data = true;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.DeleteRecord;
+                }
+                else
+                {
+                    response.Data = true;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.NotExist;
+                }
+            }
+            catch(Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message =ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Get product list or one product
+        /// </summary>
+        /// <param name="ProductId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetProduct(int? ProductId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var product = await admin.GetProduct(ProductId);
+                var routesList = mapper.Map<List<ProductDto>>(product);
+
+                response.Data = routesList;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.GetData;
+            }
+            catch(Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Get FAQ List
+        /// </summary>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetFaqs()
+        {
+            CommonResponseModel response = new();
+            try
+            {
+
+                var faqs = await admin.GetFaqs();
+                var faqList = faqs.Select(x => new FaqResponseModel()
+                {
+                    FaqId = x.FaqId,
+                    Question = x.Question,
+                    Seq = x.Seq,
+                    IsActive = true,
+                    AnswerId = x.FaqAnswers.FirstOrDefault().AnswerId,
+                    Answer = x.FaqAnswers.FirstOrDefault().Answer,
+                }).ToList().OrderBy(x => x.Seq);
+
+                response.Data = faqList;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.GetData;
+            }
+            catch(Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Save FAQ list
+        /// </summary>
+        /// <param name="faqs"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> SaveFaq(List<FaqResponseModel> faqs)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var maxSeq = admin.GetMaxSequenceNoFaq();
+                List<Faq> faqList = new List<Faq>();
+                faqs.ForEach(x =>
+                {
+                    if (x.Seq == 0)
+                    {
+                        maxSeq++;
+                    }
+                    faqList.Add(new Faq()
+                    {
+                        FaqId = x.FaqId,
+                        Question = x.Question,
+                        Seq = x.Seq == 0 ? maxSeq : x.Seq,
+                        CreatedBy = x.CreatedBy,
+                        CreatedOn = DateTime.Now,
+                        IsActive = true,
+                        IsDeleted = false,
+                        FaqAnswers = new List<FaqAnswer>()
+                        {
+                            new FaqAnswer()
+                            {
+                                AnswerId = x.AnswerId,
+                                Answer = x.Answer,
+                                CreatedBy = x.CreatedBy,
+                                 CreatedOn=DateTime.Now,
+                                IsActive=true,
+                                IsDeleted=false,
+                            }
+                        }
+                    });
+                });
+
+                var data = await faqGenericDal.ListSave(faqList);
+
+                response.Data = data;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.AddUpdate;
+
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Get Truck list or one truck
+        /// </summary>
+        /// <param name="truckId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetTruck(int? truckId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var trucks = await admin.GetTruck(truckId);
+                var truckList = mapper.Map<List<TruckDto>>(trucks);
+                response.Data = truckList;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.GetData;
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+           
+            return response;
+        }
+
+        /// <summary>
+        /// Add update trucks
+        /// </summary>
+        /// <param name="truck"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> AddUpdateTruck(TruckDto truck)
+        {
+            utility = new UtilityFunction();
+            CommonResponseModel response = new();
+            try
+            {
+               
+                var truckEntity = mapper.Map<Truck>(truck);
+                await truckGenericDal.Save(truckEntity);
+                response.Data = truckEntity.TruckId;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.AddUpdate;
+                return response;
+
+            }
+            catch(Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message =ex.Message;
+                return response;
+            }
+        }
+
+        /// <summary>
+        /// ZipCode AddUpdate
+        /// </summary>
+        /// <param name="zip"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> AddUpdateZipCode(ZipDto zip)
+        {
+
+            CommonResponseModel response = new();
+            try
+            {
+                var zipEntity = mapper.Map<ZipCode>(zip);
+                await zipGenericDal.Save(zipEntity);
+                response.Data = zipEntity.Id;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.AddUpdate;
+            }
+            catch (Exception ex)
+            {
+                response.Data =null;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Get zip code list or one by id
+        /// </summary>
+        /// <param name="ZipId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetZip(int? ZipId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var zip = await admin.GetZip(ZipId);
+                var routesList = mapper.Map<List<ZipDto>>(zip);
+                
+                response.Data = routesList;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.GetData;
+            }
+            catch(Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Delete Zip Code
+        /// </summary>
+        /// <param name="subscription"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> DeleteZipCode(int ZipId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var zip = await admin.GetZip(ZipId);
+                if (zip != null && zip.Count > 0)
+                {
+                    var zips = zip.FirstOrDefault();
+                    await zipGenericDal.Delete(zips);
+                    response.Data = true;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.DeleteRecord;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.DeleteRecord;
+                }
+
+
+            }
+            catch(Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Add and update project plan
+        /// </summary>
+        /// <param name="subscription"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> AddUpdateSubscription(SubscriptionPlanDto subscription)
+        {
+            utility = new UtilityFunction();
+            CommonResponseModel response = new();
+            try
+            {
+                var subscripEntity = mapper.Map<SubscriptionPlan>(subscription);
+                await subscripGenericDal.Save(subscripEntity);
+                response.Data = subscripEntity.Id;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message =TKMessages.AddUpdate;
+            }
+            catch(Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message =ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Get Subscription plan list
+        /// </summary>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetSubscription(int? subscriptionPlanId)
+        {
+
+            CommonResponseModel response = new();
+            try
+            {
+                var subscription = await admin.GetSubscription(null);
+                var subscriptionList = mapper.Map<List<SubscriptionPlanDto>>(subscription);
+
+                response.Data = subscriptionList;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.GetData;
+            }
+            catch(Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message =ex.Message;
+
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Get subscription plan for customer - specific plan for the customer
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetSubscriptionByCustomerId(int customerId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+
+                var subscription = await admin.GetSubscriptionByCustomerId(customerId);
+                var subscriptionList = mapper.Map<List<SubscriptionPlanDto>>(subscription);
+
+                response.Data = subscriptionList;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.GetData;
+            }
+            catch(Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+
+        }
+
+        /// <summary>
+        /// AssingRouteCustomer
+        /// </summary>
+        /// <param name="assignRoute"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> AssingRouteCustomer(List<AssignRouteDto> assignRoute)
+        {
+
+            CommonResponseModel response = new();
+            try
+            {
+                //update vehicle in aspnetuser
+                var usersList = await userDal.GetUsersByIds(assignRoute.Select(x => x.CustomerID).ToArray());
+                var users = usersList.Select(x =>
+                {
+                    x.RouteId = assignRoute.FirstOrDefault(y => y.CustomerID == x.Id).RouteID;
+                    x.IsAssign = true;
+                    return x;
+                }).ToList();
+                
+                var res = await userGenericDal.ListSave(users);
+                response.Data = true;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.AddUpdate;
+            }
+            catch (Exception ex)
+            {
+                response.Data = false;
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// upcoming deliveries
+        /// </summary>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> UpcomingDeliveries()
+        {
+            var response = new CommonResponseModel();
+            var routes = await admin.GetRoutes(null);
+            try
+            {
+                var upcomingDeliveries = await admin.GetUpcomingDeliveries();
+
+                List<CustomerDelivery> customerDeliveries = new List<CustomerDelivery>();
+                foreach (var route in routes)
+                {
+                    var days = route.Days.TrimEnd().Split(",",StringSplitOptions.None).ToList().Select(x =>
+                    {
+                        int c = (int)DateTime.Now.DayOfWeek;
+
+                        int offset = (7 - c + (int)Enum.Parse(typeof(Enums.WeekDays), x.Trim().ToLower())) % 7;
+                        return DateTime.Now.Date.AddDays(offset == 0 ? 7 : offset);
+
+                    }).ToList();
+                    var vehicles = route.AspNetUsers.SelectMany(y => y.Vehicles.Where
+                    (x => x.AssignSubscriptions.Any(z => !z.IsDeleted && z.RenewalDate >= DateTime.Now.Date))).ToList();
+
+                   
+
+                    days.ForEach(day =>
+                    {
+                        customerDeliveries.AddRange(vehicles.Select(veh => new CustomerDelivery()
+                        {
+                            VehicleId = veh.VehicleId,
+                            DeliveryDate = day,
+                            StatusId = (int)Enums.Status.Pending,
+                            CreatedBy = 1,
+                            CreatedDate = DateTime.Now,
+                            UserId=veh.AspNetUserId
+                        }));
+                    });
+                }
+
+
+                await customerDelGenericDal.ListSave(customerDeliveries.Where(x => !upcomingDeliveries.Any(up => up.VehicleId == x.VehicleId && up.DeliveryDate.Date == x.DeliveryDate.Date)).ToList());
+
+                response.Data = customerDeliveries;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = "Success";
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+                response.Message = ex.Message;
+
+                return response;
+            }
+            
+        }
+
+        //*******************************************************//
+        /// <summary>
+        /// Delete SubscrtionPlan
+        /// </summary>
+        /// <param name="subscriptionPlanId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> DeleteSubscrtionPlan(int? subscriptionPlanId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var subscriptionPlans = await admin.GetSubscription(subscriptionPlanId);
+
+                if (subscriptionPlans != null && subscriptionPlans.Count > 0)
+                {
+                    var subscriptionPlan = subscriptionPlans.Where(x => x.Id == subscriptionPlanId && !x.IsDeleted).FirstOrDefault();
+                    subscriptionPlan.IsDeleted = true;
+                    await subscripGenericDal.Save(subscriptionPlan);
+                    response.Data = true;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.DeleteRecord;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Delete FAQ
+        /// </summary>
+        /// <param name="faqId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> DeleteFAQ(int faqId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var faqs = await admin.GetFaqs();
+
+                if (faqs != null && faqs.Count > 0)
+                {
+                    var faq = faqs.Where(x => x.FaqId == faqId && x.IsDeleted == false && x.IsActive == true).FirstOrDefault();
+                    await faqGenericDal.Delete(faq);
+
+                    response.Data = true;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.DeleteRecord;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+
+        /// <summary>
+        /// Delete Truck
+        /// </summary>
+        /// <param name="truckId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> DeleteTruck(int truckId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var trucks = await admin.GetTruck(truckId);
+
+                if (trucks != null && trucks.Count > 0)
+                {
+                    var truck = trucks.Where(x => x.TruckId == truckId && x.IsDeleted == false && x.IsActive == true).FirstOrDefault();
+                    truck.IsDeleted = true;
+                    await truckGenericDal.Save(truck);
+                    response.Data = true;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.DeleteRecord;
+                }
+                else
+                {
+                    response.Data = true;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.NotExist;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public async Task<CommonResponseModel> PaymentListDateWise(DateTime From, DateTime To)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+
+            }
+            catch
+            {
+                throw;
+            }
+            return response;
+        }
+        public async Task<CommonResponseModel> GetStates(int? stateId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var state = await admin.GetStates(stateId);
+                var stateList = mapper.Map<List<StatesDto>>(state);
+                response.Data = stateList;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.GetData;
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = ex.Message;
+
+            }
+            return response;
+        }
+
+        public int GetMaxSequenceNoFaq()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<CommonResponseModel> ZipCodeValidate(string zipCode)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var zip = await admin.ZipCodeValidate(zipCode);
+                if (zip != null)
+                {
+                    response.Data = true;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = "Service is avaliable";
+                }
+                else
+                {
+                    response.Data = false;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = "comming soon";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+                response.Message = ex.Message;
+            }
+
+            return response;
+        }
+    }
+}
+
+#region commented code
+
+//        public Admin(FuelMuleFillUpContext dbContext, IConfiguration config, IGenericDAL<ZipCodes> genericProductDAL, UserManager<ApplicationUser> userManager)
+//        {
+//            // _config = config;
+//            Config = config;
+//            _dbContext = dbContext;
+//            _userManager = userManager;
+//            _genericProductDAL = genericProductDAL;
+//            //_logger = logger;
+//        }
+
+//        public async Task<CommonResponseModel> AddZipCode(ZipCodeModel zipCode)
+//        {
+//            var responseResult = new CommonResponseModel();
+//            try
+//            {
+//                var Zip = Mapper.MapData<ZipCodeModel, ZipCodes>(zipCode);
+//                var result = await _genericProductDAL.Save(Zip);
+//                if (result)
+//                {
+//                    responseResult.Data = Zip;
+//                    responseResult.StatusCode = (int)HttpStatusCode.OK;
+//                    responseResult.Message = "Zipcode added sucessfully";
+//                }
+//                else
+//                {
+//                    responseResult.Data = null;
+//                    responseResult.StatusCode = (int)HttpStatusCode.BadRequest;
+//                    responseResult.Message = TKMessages.CommonFailed;
+//                }
+//            }
+//            catch (Exception ex)
+//            {
+//             //   _logger.LogError(ex.Message);
+//                responseResult.Data = null;
+//                responseResult.Message = TKMessages.CommonFailed;
+//                responseResult.StatusCode = (int)HttpStatusCode.InternalServerError;
+//            }
+//            return responseResult;
+//        }
+
+//        public async Task<CommonResponseModel> GetCustomerAcceptedDeliveryList(DateTime AcceptedDate)
+//        {
+//            CommonResponseModel response = new();
+//            try
+//            {
+//                var acceptCustomerDeliveries = (from p in _dbContext.CustomerDelivery
+//                                                join u in _dbContext.Users on p.CreatedBy equals u.Id
+//                                                join vc in _dbContext.Vehicles on p.VehicleId equals vc.VehicleId
+//                                                join ds in _dbContext.DeliveryStatus on p.StatusId equals ds.Id
+//                                                where p.DeliveryDate.Date == AcceptedDate.Date && p.StatusId==2 //&& p.StatusId != 3 && p.IsAccepted == 2
+//                                                select new
+//                                                {
+//                                                    FirstName = u.FirstName,
+//                                                    LastName = u.LastName,
+//                                                    Address = u.Address + "," + u.Address1 + "," + u.City + u.State,
+//                                                    CustomerId = u.Id,
+//                                                    MobileNo = u.MobileNo,
+//                                                    VehicleId = vc.VehicleId.ToString(),
+//                                                    NumberPlate = vc.LicencePlateNumber,
+//                                                    StatusName = ds.StatusName,
+//                                                }).ToList();//.GroupBy(a => a.CustomerId).Select(a => new AcceptCustomerDeliveryListResponse()
+//                                                //{
+//                                                //    NoOfVehicles = a.Count().ToString(),
+//                                                //    FirstName = a.FirstOrDefault().FirstName,
+//                                                //    LicencePlate = string.Join(",", a.Select(a => a.NumberPlate)),
+//                                                //    LastName = a.FirstOrDefault().LastName,
+//                                                //    Address = a.FirstOrDefault().Address,
+//                                                //    MobileNo = a.FirstOrDefault().MobileNo,
+//                                                //    StatusName=a.FirstOrDefault().StatusName,
+//                                                //}).ToList();
+//                response.Data = acceptCustomerDeliveries;
+//                response.StatusCode = (int)HttpStatusCode.OK;
+//                response.Message = "list of accepted";
+//            }
+//            catch (Exception)
+//            {
+
+//                throw;
+//                response.Data = null;
+//                response.StatusCode = (int)HttpStatusCode.OK;
+//                response.Message = TKMessages.Routedeatils;
+//            }
+//            return response;
+//        }
+
+//        /// <summary>
+//        /// 
+//        /// </summary>
+//        /// <returns></returns>
+//        public async Task<CommonResponseModel> GetEmployeeList()
+//        {
+//            CommonResponseModel response = new();
+//            try
+//            {
+//                var uses = from a in (from ur in _dbContext.Users
+//                                      join r in _dbContext.Roles on ur.Role equals r.Id
+//                                      where Convert.ToString(r.Name).ToLower() != Convert.ToString("customer").ToLower()
+//                                      select new User()
+//                                      {
+//                                          Id = r.Id,
+//                                          FirstName = ur.FirstName,
+//                                          LastName = ur.LastName,
+//                                          Role = ur.Role,
+//                                          MobileNo = ur.MobileNo,
+//                                          LisenseNumber = ur.LisenseNumber,
+//                                          Email = ur.Email,
+//                                          Status = ur.State,
+//                                          JoiningDate = ur.JoiningDate,
+//                                          Address = ur.Address,
+//                                      }).ToList()
+//                           select a;
+//                response.Data = uses;
+//                response.StatusCode = (int)(HttpStatusCode.OK);
+//                response.Message = TKMessages.Faqs;
+//            }
+//            catch (Exception ex)
+//            {
+//                _logger.LogError(ex.Message);
+//                response.Data = null;
+//                response.Message = TKMessages.CommonFailed;
+//                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+//            }
+//            return response;
+//        }
+
+//        public async Task<CommonResponseModel> GetCustomerList()
+//        {
+//            CommonResponseModel responseModel = new();
+//            try
+//            {
+//                var uses = (from rol in _dbContext.UserRole
+//                            join ur in _dbContext.Users on rol.Id equals ur.Role
+//                            where rol.Name == "Customer"
+//                            select new DriverListForDropdownResponse()
+//                            {
+//                                Id = ur.Id,
+//                                FirstName = ur.FirstName,
+//                                LastName = ur.LastName,
+//                                Role = ur.Role,
+//                                //Name = ur.Name,
+//                                MobileNo = ur.MobileNo,
+//                                LisenseNumber = ur.LisenseNumber,
+//                                Email = ur.Email,
+//                                Status = ur.State,
+//                                JoiningDate = ur.JoiningDate,
+//                                Address = ur.Address + " " + ur.Address1 + " " + ur.City + " " + ur.Country + ""
+//                            }).ToList();
+
+//            //     var uses = from a in (from ur in _dbContext.Users
+//            //             select new DriverListForDropdownResponse()
+//            //         {
+//            //             Id = ur.Id,
+//            //             FirstName = ur.FirstName,
+//            //             LastName = ur.LastName,
+//            //             Role = ur.Role,
+//            //             //Name = ur.Name,
+//            //             MobileNo = ur.MobileNo,
+//            //             LisenseNumber = ur.LisenseNumber,
+//            //             Email = ur.Email,
+//            //             Status = ur.State,
+//            //             JoiningDate = ur.JoiningDate,
+//            //             Address = ur.Address + " " +ur.Address1+" " +ur.City+ " "+ur.Country+""
+//            //         }).Where(x => x.Role.Equals("75c26f01-31c6-483f-823b-6c2c7835582a")).ToList()
+//            //                select a;
+//              responseModel.Data = uses;
+//              responseModel.StatusCode = (int)HttpStatusCode.OK;
+//              responseModel.Message = TKMessages.Routedeatils;
+//            }
+//            catch (Exception ex)
+//            {
+
+//                throw ex;
+//            }
+//            return responseModel;
+//        }
+
+//        public async Task<CommonResponseModel> GetCustomerVehicleList()
+//        {
+//            CommonResponseModel response = new();
+//            try
+//            {
+//                var VehicleDetails = (from u in _dbContext.Users
+//                                                join vc in _dbContext.Vehicles on u.Id equals vc.UserId.ToString()
+//                                               select new
+//                                                {
+//                                                    Id=u.Id,
+//                                                    FirstName = u.FirstName,
+//                                                    LastName = u.LastName,
+//                                                    Address = u.Address + "," + u.Address1 + "," + u.City + u.State + "," +u.ZipCode,
+//                                                    CustomerId = u.Id,
+//                                                    MobileNo = u.MobileNo,
+//                                                }).ToList().GroupBy(a => a.CustomerId).Select(a => new AcceptCustomerDeliveryListResponse()
+//                                                {
+//                                                      Id=a.FirstOrDefault().Id,
+//                                                    NoOfVehicles = a.Count().ToString(),
+//                                                    FirstName = a.FirstOrDefault().FirstName,
+//                                                    LastName = a.FirstOrDefault().LastName,
+//                                                    Address = a.FirstOrDefault().Address,
+//                                                    MobileNo = a.FirstOrDefault().MobileNo,
+//                                                }).ToList();
+
+
+
+
+//                //var VehicleDetails = await(from ur in _dbContext.Users
+//                //                           join veh in _dbContext.Vehicles on ur.Id equals veh.UserId.ToString()
+//                //                           select new
+//                //                           {
+//                //                               ur.Id,
+//                //                               ur.FirstName,
+//                //                               ur.LastName,
+//                //                               ur.City,
+//                //                               ur.Address,
+//                //                               ur.Address1,
+//                //                               ur.Country,
+//                //                               ur.ZipCode,
+//                //                           }).ToListAsync();
+
+//                response.Data = VehicleDetails;
+//                response.StatusCode = (int)(HttpStatusCode.OK);
+//                response.Message = "Customer Vechicle List";
+//            }
+//            catch (Exception ex)
+//            {
+//                throw ex;
+//                response.Data = null;
+//                response.StatusCode = (int)(HttpStatusCode.BadRequest);
+//                response.Message = "Failed";
+//            }
+//            return response;
+//        }
+
+//        public async Task<CommonResponseModel> GetEmployeeDetailsById(string EmployeeId)
+//        {
+//            CommonResponseModel response = new();
+//            try
+//            {
+//                var employeeDetails = _dbContext.Users.Where(res => res.Id == EmployeeId).FirstOrDefault();
+//                if (employeeDetails != null)
+//                {
+//                    //var LicenceDetails = await (from p in _dbContext.Users
+//                    //                            join r in _dbContext.Roles on p.Role equals r.Id
+//                    //                            where p.Id==EmployeeId  
+
+//                    //                            //t.LicencePlateNumber == LicencePlateNumber || t.BarCode==Barcode &&
+
+//                    //                            select new DriverListForDropdownResponse
+//                    //                            {
+//                    //                                UserId = Convert.ToString(p.UserId),
+//                    //                                LicencePlateNumber = p.LicencePlateNumber,
+//                    //                                Name=r.Name,
+//                    //                                Color = p.Color,
+//                    //                                MakeName = p.MakeName,
+//                    //                                ModelName = p.ModelName,
+//                    //                                FirstName = p.FirstName,
+//                    //                                LastName = p.LastName,
+//                    //                                ProductName = vc.ProductName,
+//                    //                                FuelType = vc.FuelType,
+//                    //                                Id = vc.Id,
+//                    //                            }).FirstOrDefaultAsync().ConfigureAwait(true);
+
+
+//                    DriverListForDropdownResponse driver = new DriverListForDropdownResponse();
+//                    driver.Id = employeeDetails.Id;
+//                    // driver.Name=employeeDetails.na
+//                    driver.FirstName = employeeDetails.FirstName;
+//                    driver.LastName = employeeDetails.LastName;
+//                    driver.Role = employeeDetails.Role;
+//                    driver.MobileNo = employeeDetails.MobileNo;
+//                    driver.LisenseNumber = employeeDetails.LisenseNumber;
+//                    driver.Email = employeeDetails.Email;
+//                    driver.Status = employeeDetails.Status;
+//                    driver.JoiningDate = employeeDetails.JoiningDate;
+//                    driver.Address = employeeDetails.Address;
+//                    response.Data = driver;
+//                    response.StatusCode = (int)(HttpStatusCode.OK);
+//                    response.Message = TKMessages.Faqs;
+//                }
+//            }
+//            catch (Exception)
+//            {
+
+//                throw;
+//            }
+//            return response;
+//        }
+
+//        public async Task<CommonResponseModel> ListOfZipCode()
+//        {
+//            CommonResponseModel response = new();
+//            try
+//            {
+//                var zipList = await (from zc in _dbContext.ZipCodes
+//                                     select new ZipCodeResponse()
+//                                     {
+//                                         Id = zc.Id,
+//                                         Zip = zc.Zip
+//                                     }).ToListAsync();
+//                response.Data = zipList;
+//                response.StatusCode = (int)(HttpStatusCode.OK);
+//                response.Message = TKMessages.Faqs;
+
+//            }
+//            catch (Exception ex)
+//            {
+
+//                throw ex;
+//            }
+//            return response;
+//        }
+
+//        public async Task<CommonResponseModel> ValidateServiceArea(string zipCode)
+//        {
+//            CommonResponseModel responseModel = new();
+//            try
+//            {
+//                var userZip = await _dbContext.ZipCodes.Where(x => x.Zip == zipCode).FirstOrDefaultAsync();
+//                if (userZip != null)
+//                {
+//                    responseModel.Data = true;
+//                    responseModel.Message = "Sucess";
+//                    responseModel.StatusCode = (int)HttpStatusCode.OK;
+//                }
+//                else
+//                {
+//                    responseModel.Data = false;
+//                    responseModel.Message = "Service not started in your area, Comming soon";
+//                    responseModel.StatusCode = (int)HttpStatusCode.OK;
+//                }
+//            }
+//            catch(Exception ex)
+//            {
+//                throw ex;
+
+//            }
+//            return responseModel;
+//        }
+
+
+//    }
+//}
+
+
+#endregion
