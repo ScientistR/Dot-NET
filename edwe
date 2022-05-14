@@ -1,0 +1,146 @@
+//using FuelMuleFillUp.BAL.IRepository;
+//using FuelMuleFillUp.BAL.Repository;
+using FuelMuleFillUp.DAL.DAL;
+using FuelMuleFillUp.DAL.IDAL;
+using FuelMuleFillUp.Entities.Models;
+using FuelMuleFillUp.Models;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
+using FuelMuleFillUp.BAL.IRepository;
+using FuelMuleFillUp.BAL.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+namespace FuleMuleFillUp
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; set; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+                });
+            services.AddDbContext<FuelMuleFillUpENRGQAContext>(options =>
+             options.UseSqlServer(Configuration.GetConnectionString("conn")));
+            //services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            //{
+            //    options.User.RequireUniqueEmail = false;
+            //}).AddEntityFrameworkStores<FuelMuleFillUpContext>().AddDefaultTokenProviders();
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["Jwt:Key"]))
+                };
+            });
+            services.AddScoped<IAdmin, Admin>();
+            services.AddScoped<IAdminDal, AdminDal>();
+            services.AddScoped<IUserDal, UserDal>();
+            services.AddScoped<IUserBal, UserBal>();
+            services.AddScoped<ICustomerDal, CustomerDal>();
+            services.AddScoped<IPaymentDal, PaymentDal>();
+            services.AddScoped<IPaymentDal, PaymentDal>();
+            services.AddScoped<ISubscriptionDal,SubscriptionDal>();
+            services.AddScoped<IVehicleDal, VehicleDal>();
+            services.AddScoped<ICustomer, Customer>();
+            services.AddScoped<IPayment, FuelMuleFillUp.BAL.Repository.Payment>();
+            services.AddScoped(typeof(IGenericDAL<>), typeof(GenericDAL<>));         
+            services.AddControllers();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "FuelMuleFillUp", Version = "v1" });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "Standard Authorization header using the Bearer scheme. Example: \"bearer {token}\"",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        }, new List<string>()
+                    }
+                });
+
+            });
+            services.AddAutoMapper(typeof(Startup));
+        }
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)//FuelMuleFillUpContextSeedData fuelMuleFillUpContextSeedData,
+        {
+            loggerFactory.AddFile("Logs/Trace-{Date}.txt", LogLevel.Trace);
+            loggerFactory.AddFile("Logs/Error-{Date}.txt", LogLevel.Error);
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FuelMuleFillUp v1"));
+            }
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<FuelMuleFillUpENRGQAContext>();
+                context.Database.EnsureCreated();
+            }
+            //fuelMuleFillUpContextSeedData.EnsureSeedData(env).Wait();
+           
+            app.UseHttpsRedirection();
+
+            app.UseRouting();
+           
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+        }
+    }
+    
+}
