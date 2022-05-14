@@ -1,0 +1,1398 @@
+using AutoMapper;
+using FuelMuleFillUp.Entities.Models;
+using FuelMuleFillUp.Models.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp
+{
+    public class AutoMapperProfile : AutoMapper.Profile
+    {
+        public AutoMapperProfile()
+        {
+            CreateMap<UserDto, AspNetUser>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
+                .ForMember(x => x.Role, opt => opt.Ignore());
+
+            CreateMap<AspNetUser, UserDto>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
+                .ForMember(x => x.RoleName, opt => opt.MapFrom(y => y.Role.Name));
+
+            CreateMap<RouteDetail, RouteDetailDto>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
+                .ReverseMap();
+
+            CreateMap<Product, ProductDto>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
+                .ReverseMap();
+            CreateMap<Vehicle, VehicleDto>()
+                .ForMember(x => x.VehicleId, opt => opt.MapFrom(y => y.VehicleId))
+                .ReverseMap();
+            CreateMap<Truck, TruckDto>()
+                .ForMember(x => x.TruckId, opt => opt.MapFrom(y => y.TruckId))
+                .ReverseMap();
+            CreateMap<ZipCode, ZipDto>()
+              .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
+              .ReverseMap();
+
+            CreateMap<SubscriptionPlan, SubscriptionPlanDto>()
+             .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
+             .ReverseMap();
+
+            CreateMap<FuelMuleFillUp.Entities.Models.Payment, PaymentDto>()
+            .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
+            .ForMember(x => x.CustomerName, opt => opt.MapFrom(y => y.AspNetUser.FirstName + " " + y.AspNetUser.LastName))
+            .ForMember(x => x.LicensePlateNumber, opt => opt.MapFrom(y => y.Vehicle.LicencePlateNumber));
+
+
+            CreateMap<PaymentDto, FuelMuleFillUp.Entities.Models.Payment>()
+            .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id));
+
+            CreateMap<OrderDetail, OrderDetailDto>()
+         .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
+         .ReverseMap();
+            CreateMap<State, StatesDto>()
+       .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
+       .ReverseMap();
+        }
+    }
+}
+=======
+using FuelMuleFillUp.Models.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.DAL.IDAL
+{
+    public interface IGenericDAL<T>
+    {
+        Task<bool> Save(T model);
+        Task<bool> ListSave(List<T> model);
+        Task<bool> Delete(T model);
+    }
+}
+
+=========
+using FuelMuleFillUp.DAL.IDAL;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using FuelMuleFillUp.Entities.Models;
+using FuelMuleFillUp.Models.Models;
+
+namespace FuelMuleFillUp.DAL.DAL
+{
+    public class GenericDAL<T> : IGenericDAL<T> where T : class
+    {
+        #region Private
+        private readonly FuelMuleFillUpENRGQAContext _dbContext;
+       // private readonly ILogger _logger;
+        #endregion
+
+        #region Constructor
+        public GenericDAL(FuelMuleFillUpENRGQAContext dbContext)
+        {
+            _dbContext = dbContext;
+           // _logger = logger;
+        }
+        #endregion
+
+
+        #region Add / Update 
+        public async Task<bool> Save(T model)
+        {
+            try
+            {
+                _dbContext.Set<T>().Update(model);
+                return await _dbContext.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        #endregion
+
+        public async Task<bool> ListSave(List<T> model)
+        {
+            try
+            {
+                using (_dbContext)
+                {
+                    _dbContext.Set<T>().UpdateRange(model);
+                    return await _dbContext.SaveChangesAsync() > 0;
+                }
+            
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                _dbContext.Dispose();
+            }
+        }
+
+        #region Delete
+        public async Task<bool> Delete(T model)
+        {
+            try
+            {
+                using (_dbContext)
+                {
+                    _dbContext.Set<T>().Remove(model);
+                    return await _dbContext.SaveChangesAsync() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        #endregion
+    }
+
+
+}
+============
+using FuelMuleFillUp.Entities.Models;
+using FuelMuleFillUp.Models;
+using FuelMuleFillUp.Models.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.DAL.IDAL
+{
+    public interface ICustomerDal
+    {
+        Task<List<AspNetUser>> GetCustomers(int routeId);
+        Task<CustomerDelivery> GetCustomerDeliveryById(int deliveryId);
+        Task<CustomerDelivery> GetCustomerDeliveryOrders(OrderDetailDto order);
+        Task<List<CustomerDelivery>> GetCustomerUpcomingDeliveries(int? customerId);
+        Task<List<CustomerDelivery>> GetCustomerDeliveriesForDate(DateTime deliveryDate, int? customerId);
+        Task<List<CustomerDelivery>> GetCustomerPastDeliveries(int? customerId);
+        Task<AspNetUser> ResetPassword(string username, string password, string confirmPassword);
+        Task<AspNetUser> OtpSend(string username, EmailSettings emailSettings);
+        Task<AspNetUser> VerifyOtp(string username, string otp);
+        Task<CommonResponseModel> CustomersSubscriptiomPlanList(int userId);
+        Task<CommonResponseModel> AddUpdateBarCode(int VehicleId, string BarCode);
+        Task<AspNetUser> SendCustomerReferralCode(int customerId, string email);
+       
+       // Task<CommonResponseModel> OrderStatus(OrderDetailDto order);
+    }
+}
+===============
+using FuelMuleFillUp.Entities.Models;
+using FuelMuleFillUp.Models;
+using FuelMuleFillUp.Models.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.DAL.IDAL
+{
+    public interface ICustomerDal
+    {
+        Task<List<AspNetUser>> GetCustomers(int routeId);
+        Task<CustomerDelivery> GetCustomerDeliveryById(int deliveryId);
+        Task<CustomerDelivery> GetCustomerDeliveryOrders(OrderDetailDto order);
+        Task<List<CustomerDelivery>> GetCustomerUpcomingDeliveries(int? customerId);
+        Task<List<CustomerDelivery>> GetCustomerDeliveriesForDate(DateTime deliveryDate, int? customerId);
+        Task<List<CustomerDelivery>> GetCustomerPastDeliveries(int? customerId);
+        Task<AspNetUser> ResetPassword(string username, string password, string confirmPassword);
+        Task<AspNetUser> OtpSend(string username, EmailSettings emailSettings);
+        Task<AspNetUser> VerifyOtp(string username, string otp);
+        Task<CommonResponseModel> CustomersSubscriptiomPlanList(int userId);
+        Task<CommonResponseModel> AddUpdateBarCode(int VehicleId, string BarCode);
+        Task<AspNetUser> SendCustomerReferralCode(int customerId, string email);
+       
+       // Task<CommonResponseModel> OrderStatus(OrderDetailDto order);
+    }
+}
+============
+using FuelMuleFillUp.DAL.IDAL;
+using FuelMuleFillUp.Entities.Models;
+using FuelMuleFillUp.Models;
+using FuelMuleFillUp.Models.Models;
+using FuelMuleFillUp.Models.ResponseModel;
+using FuelMuleFillUp.Utilities;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.DAL.DAL
+{
+    public class CustomerDal : ICustomerDal
+    {
+        //private readonly CustomerDal customerDal;
+        private readonly FuelMuleFillUpENRGQAContext _dbContext;
+        private readonly IGenericDAL<AspNetUser> userGenericDal;
+        public CustomerDal(IGenericDAL<AspNetUser> userGenericDal, FuelMuleFillUpENRGQAContext _dbContext)
+        {
+            //this.customerDal = customerDal;
+            this.userGenericDal = userGenericDal;
+            this._dbContext = _dbContext;
+            //  var Route = Mapper.MapData<UserDto, AspNetUser>(user);
+        }
+
+
+        /// <summary>
+        /// GetCustomers by RouteId
+        /// </summary>
+        /// <param name="RouteId"></param>
+        /// <returns></returns>
+        public async Task<List<AspNetUser>> GetCustomers(int routeId)
+        {
+
+            return await _dbContext.AspNetUsers.Where(x => x.RouteId == routeId || x.RouteId == 0).ToListAsync();
+
+        }
+
+        /// <summary>
+        /// Get customer upcoming deliveries
+        /// </summary>
+        /// <param name="deliveryId"></param>
+        /// <returns></returns>
+        public async Task<List<CustomerDelivery>> GetCustomerUpcomingDeliveries(int? customerId)
+        {
+            var deliveryList = await _dbContext.CustomerDeliveries.Where(x => x.Vehicle.AspNetUserId == customerId && !x.IsDeleted && x.DeliveryDate.Date >= System.DateTime.Now.Date).Include(x => x.Status)
+                 .Include(res => res.Vehicle)
+                .ToListAsync();
+
+            return deliveryList;
+        }
+
+        /// <summary>
+        /// Get customer upcoming deliveries
+        /// </summary>
+        /// <param name="deliveryId"></param>
+        /// <returns></returns>
+        public async Task<List<CustomerDelivery>> GetCustomerDeliveriesForDate(DateTime deliveryDate, int? customerId)
+        {
+            var deliveryList = await _dbContext.CustomerDeliveries.Where(x => (customerId == null || x.UserId == customerId) && !x.IsDeleted && x.DeliveryDate.Date == deliveryDate)
+             .Include(x => x.Vehicle)
+                .Include(x => x.Status)
+                      .ToListAsync();
+
+            return deliveryList;
+        }
+
+        public async Task<CustomerDelivery> GetCustomerDeliveryById(int deliveryId)
+        {
+            var deliveryList = await _dbContext.CustomerDeliveries.Where(x => x.Id == deliveryId && !x.IsDeleted).FirstOrDefaultAsync();
+            return deliveryList;
+        }
+
+        /// <summary>
+        /// Customer Past Delivery
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        public async Task<List<CustomerDelivery>> GetCustomerPastDeliveries(int? customerId)
+        {
+            var deliveryList = await _dbContext.CustomerDeliveries.Where(x => (customerId == null || x.UserId == customerId) && !x.IsDeleted && x.DeliveryDate.Date <= System.DateTime.Now.Date).ToListAsync();
+
+            return deliveryList;
+        }
+
+        public async Task<AspNetUser> ResetPassword(string username, string password, string confirmPassword)
+        {
+            var restpwd = await _dbContext.AspNetUsers.Where(res => res.Email == username).FirstOrDefaultAsync();
+            restpwd.PasswordHash = password;
+            _dbContext.Entry(restpwd).State = EntityState.Modified;
+            _dbContext.SaveChanges();
+            return restpwd;
+        }
+
+        public async Task<AspNetUser> OtpSend(string username, EmailSettings emailSettings)
+        {
+            UtilityFunction function = new();
+            var sendOtp = await _dbContext.AspNetUsers.Where(res => res.Email == username).FirstOrDefaultAsync();
+            var otpDetails = GenerateRandomOTP();
+            sendOtp.Otp = otpDetails;
+            _dbContext.Entry(sendOtp).State = EntityState.Modified;
+            _dbContext.SaveChanges();
+            EmailInfo emailInfo = new();
+            emailInfo.EmailTo = sendOtp.Email;
+            emailInfo.Subject = "send otp";
+            emailInfo.Body = "This is your reset password Otp" + " " + otpDetails;
+            function.SendEmailAsync(emailInfo, emailSettings);
+            return sendOtp;
+        }
+
+        public string GenerateRandomOTP()
+        {
+            string[] saAllowedCharacters = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" };
+            string sOTP = String.Empty;
+            string sTempChars = String.Empty;
+            Random rand = new();
+            for (int i = 0; i < 4; i++)
+            {
+                sTempChars = saAllowedCharacters[rand.Next(0, saAllowedCharacters.Length)];
+                sOTP += sTempChars;
+            }
+            return sOTP;
+        }
+
+        public async Task<AspNetUser> VerifyOtp(string username, string otp)
+        {
+            var sendOtp = await _dbContext.AspNetUsers.Where(res => res.Email == username && res.Otp == otp).FirstOrDefaultAsync();
+            return sendOtp;
+        }
+
+        /// <summary>
+        /// CustomersSubscriptiomPlanList
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> CustomersSubscriptiomPlanList(int userId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var plans = _dbContext.SubscriptionPlans.Where(a => !a.IsDeleted).ToList();
+
+                var data = await (from vc in _dbContext.Vehicles
+                                  where vc.AspNetUserId == userId && !vc.IsDeleted
+                                  group new { vc } by new { vc.LicencePlateNumber, vc.MakeName, vc.ModelName, vc.VehicleId, } into grp
+                                  select new VehicleListWithSubscrptionPlanResponseModel()
+                                  {
+                                      VehicleId = grp.Key.VehicleId,
+                                      LicencePlateNumber = grp.Key.LicencePlateNumber,
+                                      MakeName = grp.Key.MakeName,
+                                      ModelName = grp.Key.ModelName
+                                  }).ToListAsync().ConfigureAwait(false);
+                int rowcount = 0;
+                if (data.Count() > 0)
+                {
+                    foreach (var item in data)
+                    {
+                        if (plans != null)
+                        {
+                            List<PlansResponseModel> planList = (from p in plans
+                                                                 join sp in _dbContext.AssignSubscriptions on new { X1 = p.Id, X2 = item.VehicleId, X3 = userId } equals new { X1 = sp.PlanId, X2 = sp.VehicleId, X3 = sp.AspNetUserId } into spp
+                                                                 from n in spp.Where(a => a.RenewalDate >= DateTime.UtcNow).OrderBy(x => x.IsPrimary).DefaultIfEmpty()
+                                                                 select new PlansResponseModel()
+                                                                 {
+                                                                     Id = p.Id,
+                                                                     Amount = (rowcount > 0 ? Convert.ToDecimal(p.Amount) / 2 : Convert.ToDecimal(p.Amount)),
+                                                                     PlanName = p.PlanName,
+                                                                     Discount = Convert.ToDecimal(p.Discount),
+                                                                     NoOfTransation = p.NoOfTransation,
+                                                                     PerStopAmount = Convert.ToDecimal(p.PerStopAmount),
+                                                                     SubscriptionDays = p.SubscriptionDays,
+                                                                     NumberOfStops = p.NumberOfStops,
+                                                                     GasUsage = p.GasUsage,
+                                                                     SubscribeDate = (n != null ? n.SubscribeDate : null),
+                                                                     RenewalDate = (n != null ? n.RenewalDate : null),
+                                                                     IsPlanSelected = (n != null ? n.IsPlanSelected ? n.SubscribeDate < DateTime.UtcNow : false : false),
+                                                                 }).ToList();
+                            item.Plans = planList;
+                            rowcount++;
+                        }
+                    }
+                    response.Data = data;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.Message = "Failed";
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                }
+
+            }
+            catch
+            {
+
+                response.Data = null;
+                response.Message = "failed";
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+            }
+            return response;
+        }
+
+        public async Task<CommonResponseModel> AddUpdateBarCode(int VehicleId, string BarCode)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var check_vehicleBarcode = (from item in _dbContext.Vehicles where item.BarCode == BarCode select item).ToList();
+
+                if (check_vehicleBarcode.Count() > 0)
+                {
+                    response.Data = null;
+                    response.Message = "Already assign";
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                }
+                else
+                {
+                    if (VehicleId > 0)
+                    {
+                        var c = await (from x in _dbContext.Vehicles
+                                       where x.VehicleId == VehicleId
+                                       select x).FirstOrDefaultAsync();
+                        c.BarCode = BarCode;
+                        _dbContext.SaveChanges();
+                        response.Data = null;
+                        response.StatusCode = (int)HttpStatusCode.OK;
+                    }
+                    else
+                    {
+                        response.Data = null;
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //_logger.LogError(ex.Message);
+                response.Data = null;
+                // response.Message = TKMessages.CommonFailed;
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+            }
+            return response;
+        }
+
+        public async Task<CustomerDelivery> GetCustomerDeliveryOrders(OrderDetailDto order)
+        {
+            var customeOrdersDetails = await _dbContext.CustomerDeliveries.Where(x => x.UserId == order.UserId && x.VehicleId == order.VehicleId).FirstOrDefaultAsync();
+            return customeOrdersDetails;
+        }
+
+        public async Task<AspNetUser> SendCustomerReferralCode(int customerId, string email)
+        {
+            var restpwd = await _dbContext.AspNetUsers.Where(res => res.Id == customerId).FirstOrDefaultAsync();
+            return restpwd;
+        }
+
+        //public async Task<CommonResponseModel> OrderStatus(OrderDetailDto order)
+        //{
+        //    //CommonResponseModel response = new();
+        //    var cust = await _dbContext.CustomerDeliveries.Where(res => res.UserId == order.UserId && res.VehicleId == order.VehicleId && res.DeliveryDate.Date == order.CreatedDate.Date).FirstOrDefaultAsync();
+        //    if (cust != null)
+        //    {
+        //         cust.StatusId = 3;
+        //        _dbContext.CustomerDeliveries.Update(cust);
+        //        _dbContext.SaveChanges();
+
+        //    }
+        //    return cust;
+        //}
+    }
+}
+======
+using AutoMapper;
+using ClosedXML.Excel;
+using FuelMuleFillUp.BAL.IRepository;
+using FuelMuleFillUp.DAL.IDAL;
+using FuelMuleFillUp.Entities.Models;
+using FuelMuleFillUp.Models;
+using FuelMuleFillUp.Models.Models;
+using FuelMuleFillUp.Models.ResponseModel;
+using FuelMuleFillUp.Utilities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.BAL.Repository
+{
+    public class Customer : ICustomer
+    {
+        private readonly IVehicleDal vehicleDal;
+        private readonly IGenericDAL<Vehicle> vehicleGenericDal;
+        private readonly IMapper mapper;
+        private readonly ICustomerDal customerDal;
+        private readonly IConfiguration _config;
+        private readonly IGenericDAL<OrderDetail> orderGenericDal;
+        private readonly IGenericDAL<CustomerDelivery> customerDeliverytGenericDal;
+        private readonly IGenericDAL<AssignSubscription> assignedSubsGenericDal;
+        private readonly ISubscriptionDal subscriptionDal;
+        private readonly FuelMuleFillUpENRGQAContext _dbContext;
+        private readonly ILogger<Customer> _logger;
+
+        public Customer(IVehicleDal vehicleDal, IGenericDAL<Vehicle> vehicleGenericDal, IMapper mapper, ICustomerDal customerDal
+            , IGenericDAL<OrderDetail> orderGenericDal, IGenericDAL<CustomerDelivery> customerDeliverytGenericDal, ISubscriptionDal subscriptionDal
+            , IGenericDAL<AssignSubscription> assignedSubsGenericDal, FuelMuleFillUpENRGQAContext _dbContext, IConfiguration _config, ILogger<Customer> _logger)
+        {
+            this.vehicleDal = vehicleDal;
+            this.vehicleGenericDal = vehicleGenericDal;
+            this.mapper = mapper;
+            this.customerDal = customerDal;
+            this.orderGenericDal = orderGenericDal;
+            this.customerDeliverytGenericDal = customerDeliverytGenericDal;
+            this.subscriptionDal = subscriptionDal;
+            this.assignedSubsGenericDal = assignedSubsGenericDal;
+            this._dbContext = _dbContext;
+            this._config = _config;
+            this._logger = _logger;
+        }
+
+        /// <summary>
+        /// Get vehicles
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetVehicles(int? userId, int? vehicleId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var vehicles = await vehicleDal.GetVehicles(userId, vehicleId);
+                if (vehicles != null)
+                {
+                    var deliveries = vehicles.Select(x => new VehicleResponseModel()
+                    {
+                        VehicleId = x.VehicleId,
+                        AspNetUserId = x.AspNetUserId,
+                        FirstName = x.AspNetUser.FirstName,
+                        LastName = x.AspNetUser.LastName,
+                        ProductName = x.Product.ProductName,
+                        Products = x.Product.ProductName + " " + x.Product.FuelType,
+                        ProductId = x.ProductId,
+                        LicencePlateNumber = x.LicencePlateNumber,
+                        ParkingNumber = x.ParkingNumber,
+                        BarCode = x.BarCode,
+                        Color = x.Color,
+                        MakeName = x.MakeName,
+                        TankSize = x.TankSize,
+                        ModelName = x.ModelName,
+                        CreatedBy = x.CreatedBy,
+                        CreatedDate = x.CreatedDate,
+                        ModifyBy = x.ModifyBy,
+                        ModifyDate = x.ModifyDate,
+                        ImageUrl = x.ImageUrl,
+                        GateCode = x.GateCode,
+                        OtherInstructions = x.OtherInstructions
+                    }).ToList();
+
+                    response.Data = deliveries;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.GetData;
+
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+        /// <summary>
+        /// Add and update Vehicles
+        /// </summary>
+        /// <param name="vehicle"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> AddUpdateVehicle(VehicleDto vehicle)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var vehicleEntity = mapper.Map<Vehicle>(vehicle);
+                var result = await vehicleGenericDal.Save(vehicleEntity);
+                if (result)
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.AddUpdate;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.CommonFailed;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+        /// <summary>
+        /// Delete vehicle
+        /// </summary>
+        /// <param name="vehicleId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> DeleteVehicle(int vehicleId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var routes = await vehicleDal.GetVehicles(null, vehicleId);
+                var route = routes.FirstOrDefault();
+                route.IsDeleted = true;
+                var result = await vehicleGenericDal.Save(route);
+                if (result)
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.DeleteRecord;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.CommonFailed;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Get customer deliveries
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetCustomerUpcomingDeliveries(int? customerId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var customerDeliveries = await customerDal.GetCustomerUpcomingDeliveries(customerId);
+                if (customerDeliveries != null)
+                {
+                    var deliveries = customerDeliveries.Select(x => new UpcommingCustomer()
+                    {
+                        VehicleId = x.VehicleId,
+                        LicencePlateNumber = x.Vehicle.LicencePlateNumber,
+                        TankSize = x.Vehicle.TankSize,
+                        DeliveryDate = x.DeliveryDate,
+                        StatusId = x.Status.Id,
+                        DeliveryStatus = x.Status.StatusName
+                    }).ToList();
+                    response.Data = deliveries;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.GetData;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+        /// <summary>
+        /// Get customer deliveries
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetCustomerDeliveriesForDate(DateTime deliveryDate, int? userId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var customerDeliveries = await customerDal.GetCustomerDeliveriesForDate(deliveryDate, userId);
+                if (customerDeliveries != null)
+                {
+                    var deliveries = customerDeliveries.Select(x => new CustomerDeliveryResponseModel()
+                    {
+                        DeliveryId = x.Id,
+                        LicencePlateNumber = x.Vehicle.LicencePlateNumber,
+                        TankSize = x.Vehicle.TankSize,
+                        StatusId = x.StatusId,
+                        Status = x.Status.StatusName,
+                        DeliveryDate = x.DeliveryDate
+
+                    }).ToList();
+                    response.Data = deliveries;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.GetData;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+        /// <summary>
+        /// Accept Delivery
+        /// </summary>
+        /// <param name="deliveryId"></param>
+        /// <param name="actionId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> AcceptCustomerDelivery(int deliveryId, int actionId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                //change by rishabh included vehicle and product
+                var getCustomerDelivery = await customerDal.GetCustomerDeliveryById(deliveryId);
+
+                if (getCustomerDelivery != null && deliveryId > 0)
+                {
+                    getCustomerDelivery.StatusId = actionId;
+
+                    getCustomerDelivery.ModifyDate = DateTime.UtcNow;
+                    getCustomerDelivery.ModifyBy = getCustomerDelivery.ModifyBy;
+
+                    var result = await customerDeliverytGenericDal.Save(getCustomerDelivery);
+
+
+                    if (result)
+                    {
+                        response.Data = getCustomerDelivery;
+                        response.StatusCode = (int)HttpStatusCode.OK;
+                        response.Message = TKMessages.Deliverystatus;
+                    }
+                    else
+                    {
+                        response.Data = null;
+                        response.Message = TKMessages.ErrorMessage;
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    }
+                }
+                else
+                {
+                    response.Data = null;
+                    response.Message = TKMessages.ErrorMessage;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+        /// <summary>
+        /// Add Orders
+        /// </summary>
+        /// <param name="order"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> AddOrder(OrderDetailDto order)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var orderEntity = mapper.Map<OrderDetail>(order);
+                var result = await orderGenericDal.Save(orderEntity);
+                //var changeStatus = await customerDal.OrderStatus(order);
+                var cust = await _dbContext.CustomerDeliveries.Where(res => res.UserId == order.UserId && res.VehicleId == order.VehicleId && res.DeliveryDate.Date == order.CreatedDate.Date).FirstOrDefaultAsync();
+                if (cust != null)
+                {
+                    cust.StatusId = 3;
+                    _dbContext.CustomerDeliveries.Update(cust);
+                    var flag = _dbContext.SaveChanges();
+                    if (flag > 0)
+                    {
+                        response.Data = flag;
+                        response.StatusCode = (int)HttpStatusCode.OK;
+                        response.Message = TKMessages.msgorder;
+                    }
+                    else
+                    {
+                        response.Data = null;
+                        response.StatusCode = (int)HttpStatusCode.OK;
+                        response.Message = TKMessages.CommonFailed;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Customer past deliveries
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetCustomerPastDeliveries(int? customerId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var customerDeliveries = await customerDal.GetCustomerPastDeliveries(customerId);
+                if (customerDeliveries != null)
+                {
+                    response.Data = customerDeliveries;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.GetData;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+        /// <summary>
+        /// Assign subscription plan
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="planId"></param>
+        /// <param name="vehicleId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> AssignSubscriptionPlan(int userId, int planId, int vehicleId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var plan = await subscriptionDal.GetPlans(planId);
+                var assignedPlans = await subscriptionDal.GetAssignedSubscriptionByUserId(userId);
+
+                var assignSubscription = new AssignSubscription()
+                {
+                    AspNetUserId = userId,
+                    PlanId = planId,
+                    VehicleId = vehicleId,
+                    SubscribeDate = DateTime.Now.Date,
+                    IsPlanSelected = true,
+                    RenewalDate = DateTime.Now.Date.AddDays(plan.FirstOrDefault().SubscriptionDays),
+                    SubscribeAmount = assignedPlans.Any(x => x.PlanId == planId) ? plan.FirstOrDefault().Amount / 2 : plan.FirstOrDefault().Amount,
+                    IsPrimary = !assignedPlans.Any()
+                };
+                var result = await assignedSubsGenericDal.Save(assignSubscription);
+                if (result)
+                {
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.AddUpdate;
+                }
+                else
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.CommonFailed;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+        /// <summary>
+        /// GetPlan(int userId, int vehicleId, int PlanId)
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="vehicleId"></param>
+        /// <param name="PlanId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> CancelPlan(int userId, int vehicleId, int PlanId)
+        {
+
+            CommonResponseModel response = new();
+            try
+            {
+                var plans = await subscriptionDal.GetPlan(userId, vehicleId, PlanId);
+                if (plans != null)
+                {
+                    var plan = plans.FirstOrDefault();
+                    plan.CancelPlan = true;
+                    var result = await assignedSubsGenericDal.Save(plan);
+                    if (result)
+                    {
+                        response.Data = true;
+                        response.StatusCode = (int)HttpStatusCode.OK;
+                        response.Message = TKMessages.Cancel;
+                    }
+                    else
+                    {
+                        response.Data = true;
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        response.Message = TKMessages.CommonFailed;
+                    }
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// GetAssignSubscriptionPlanUserId
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetAssignSubscriptionPlanUserId(int userId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var customerDeliveries = await subscriptionDal.GetAssignedSubscriptionByUserId(userId); //GetAssignedSubscriptionByUserId GetAssignSubscriptionPlanUserId
+                if (customerDeliveries != null)
+                {
+                    response.Data = customerDeliveries;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.GetData;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotPlan;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+        /// <summary>
+        /// ResetPassword
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <param name="confirmPassword"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> ResetPassword(string username, string password, string confirmPassword)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var resetpwd = await customerDal.ResetPassword(username, password, confirmPassword);
+                if (resetpwd != null)
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.Reset;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.CommonFailed;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// OtpSend
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="emailSettings"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> OtpSend(string username, EmailSettings emailSettings)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var resetpwd = await customerDal.OtpSend(username, emailSettings);
+                if (resetpwd != null)
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.OTP;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.CommonFailed;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+        /// <summary>
+        /// VerifyOtp
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="otp"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> VerifyOtp(string username, string otp)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var verifyOtp = await customerDal.VerifyOtp(username, otp);
+                if (verifyOtp != null)
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.VerifyOtp;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.InvalidOtp;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// CustomersSubscriptiomPlanList
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> CustomersSubscriptiomPlanList(int userId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var customerPlan = await customerDal.CustomersSubscriptiomPlanList(userId);
+                response.Data = customerPlan;
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+
+        }
+
+        /// <summary>
+        /// AddUpdateBarCode
+        /// </summary>
+        /// <param name="VehicleId"></param>
+        /// <param name="BarCode"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> AddUpdateBarCode(int VehicleId, string BarCode)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var assignvehicle = await customerDal.AddUpdateBarCode(VehicleId, BarCode);
+                if (assignvehicle != null)
+                {
+                    response.Data = assignvehicle;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.AddUpdate;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.CommonFailed;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// GetBarCodeLicense
+        /// </summary>
+        /// <param name="BarCoderId"></param>
+        /// <param name="licenseId"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetBarCodeLicense(string BarCoderId, string licenseId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var vehicles = await vehicleDal.GetBarCodeLicense(BarCoderId, licenseId);
+
+                if (vehicles != null)
+                {
+                    var vehiclesList = mapper.Map<List<VehicleDto>>(vehicles);
+                    response.Data = vehiclesList;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.GetData;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+        /// <summary>
+        /// SendCustomerReferralCode
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> SendCustomerReferralCode(int customerId, string email)
+        {
+            try
+            {
+                CommonResponseModel response = new();
+                var sendref = await customerDal.SendCustomerReferralCode(customerId, email);
+                var res = sendref.ReferralCode;
+                var name = sendref.FirstName + " " + sendref.LastName;
+                var emailid = email;
+                EmailSettings emailSettings = new();
+                emailSettings.Email = _config.GetValue<string>("EmailConfiguration:From");
+                emailSettings.Password = _config.GetValue<string>("EmailConfiguration:Password");
+                emailSettings.Host = _config.GetValue<string>("EmailConfiguration:ServerAddress");
+                emailSettings.Port = _config.GetValue<int>("EmailConfiguration:ServerPort");
+                UtilityFunction function = new();
+                EmailInfo emailInfo = new();
+                emailInfo.EmailTo = emailid;
+                emailInfo.Subject = "Send Referral Code";
+                emailInfo.Body = TKMessages.Registrationmessage + res;
+                function.SendCustomerReferralCode(emailInfo, emailSettings, res, name);
+
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = TKMessages.Faqs;
+                return response;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Genetea excel for scheduled delivery.
+        /// </summary>
+        /// <param name="deliveryDate"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GenrateExcleSheetForAcceptedCustomer(DateTime deliveryDate)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                DataTable dt = await getData(deliveryDate);
+                string path = "E:\\Excel\\";
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+                using (XLWorkbook wb = new XLWorkbook())
+                {
+                    wb.Worksheets.Add(dt);
+                    wb.SaveAs(path + "AcceptedDeliveries.xlsx");//+ DateTime.UtcNow.Date
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = "SUCESS";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                response.Data = null;
+                response.Message = TKMessages.CommonFailed;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DeliveryDate"></param>
+        /// <returns></returns>
+        public async Task<DataTable> getData(DateTime DeliveryDate)
+        {
+            DataTable dt = new DataTable();
+            dt.TableName = "EmployeeData";
+            var acceptedCustomerDeliveries = await customerDal.GetCustomerDeliveriesForDate(DeliveryDate,0) ;
+
+            //var acceptCustomerDeliveries = (from p in _dbContext.CustomerDelivery
+            //                                join u in _dbContext.Users on p.CreatedBy equals u.Id
+            //                                join vc in _dbContext.Vehicles on p.VehicleId equals vc.VehicleId
+            //                                where p.DeliveryDate.Date == DeliveryDate.Date && p.StatusId != 3 && p.IsAccepted == 2
+            //                                select new
+            //                                {
+            //                                    FirstName = u.FirstName,
+            //                                    LastName = u.LastName,
+            //                                    Address = u.Address + "," + u.Address1 + "," + u.City + u.State,
+            //                                    CustomerId = u.Id,
+            //                                    MobileNo = u.MobileNo,
+            //                                    VehicleId = vc.VehicleId.ToString(),
+            //                                    NumberPlate = vc.LicencePlateNumber
+            //                                }).ToList().GroupBy(a => a.CustomerId).Select(a => new AcceptCustomerDeliveryListResponse()
+            //                                {
+            //                                    NoOfVehicles = a.Count().ToString(),
+            //                                    FirstName = a.FirstOrDefault().FirstName,
+            //                                    LicencePlate = string.Join(",", a.Select(a => a.NumberPlate)),
+            //                                    LastName = a.FirstOrDefault().LastName,
+            //                                    Address = a.FirstOrDefault().Address,
+            //                                    MobileNo = a.FirstOrDefault().MobileNo
+            //                                }).ToList();
+            dt.Columns.Add("SI", typeof(int));
+            dt.Columns.Add("FirstName", typeof(string));
+            dt.Columns.Add("LastName", typeof(string));
+            dt.Columns.Add("Address", typeof(string));
+            dt.Columns.Add("NoOfVehicles", typeof(string));
+            dt.Columns.Add("LicencePlates", typeof(string));
+            dt.Columns.Add("MobileNo", typeof(string));
+            if (acceptedCustomerDeliveries != null)
+            {
+                int i = 1;
+                foreach (var item in acceptedCustomerDeliveries)
+                {
+                   dt.Rows.Add(i, item.Vehicle.AspNetUser.FirstName +' ' + item.Vehicle.AspNetUser.LastName, item, item.Vehicle.AspNetUser.Address, item.Vehicle.LicencePlateNumber, item.Vehicle.AspNetUser.MobileNo);
+                    i++;
+                }
+            }
+            dt.AcceptChanges();
+            return dt;
+        }
+    }
+}
+=======
+using FuelMuleFillUp.Models;
+using FuelMuleFillUp.Models.Models;
+//using FuelMuleFillUp.Models.RequestModel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.BAL.IRepository
+{
+  public  interface ICustomer
+    {
+        Task<CommonResponseModel> GetVehicles(int? userId, int? vehicleId);
+        Task<CommonResponseModel> AddUpdateVehicle(VehicleDto vehicle);
+        Task<CommonResponseModel> DeleteVehicle(int vehicleId);
+        Task<CommonResponseModel> GetCustomerUpcomingDeliveries(int? customerId);
+        Task<CommonResponseModel> GetCustomerDeliveriesForDate(DateTime deliveryDate, int? userId);
+        Task<CommonResponseModel> AcceptCustomerDelivery(int deliveryId, int actionId);
+        Task<CommonResponseModel> AddOrder(OrderDetailDto order);
+        Task<CommonResponseModel> GetCustomerPastDeliveries(int? customerId);
+        Task<CommonResponseModel> AssignSubscriptionPlan(int userId, int planId, int vehicleId);
+        Task<CommonResponseModel> CancelPlan(int userId, int vehicleId, int PlanId);
+        Task<CommonResponseModel> GetAssignSubscriptionPlanUserId(int userId);
+        Task<CommonResponseModel> ResetPassword(string username, string password, string confirmPassword);
+        Task<CommonResponseModel> OtpSend(string username, EmailSettings emailSettings);
+        Task<CommonResponseModel> VerifyOtp(string username, string otp);
+        Task<CommonResponseModel> CustomersSubscriptiomPlanList(int userId);
+        Task<CommonResponseModel> AddUpdateBarCode(int VehicleId, string BarCode);
+        Task<CommonResponseModel> GetBarCodeLicense(string coderId, string licenseId);
+        Task<CommonResponseModel> SendCustomerReferralCode(int customerId, string email);
+        Task<CommonResponseModel> GenrateExcleSheetForAcceptedCustomer(DateTime deliveryDate);
+    }
+}
+
