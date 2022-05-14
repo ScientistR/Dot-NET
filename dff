@@ -1,0 +1,1334 @@
+USE [master]
+GO
+/****** Object:  Database [FuelMuleFillUp-ENRG-Test]    Script Date: 1/18/2022 5:48:14 PM ******/
+CREATE DATABASE [FuelMuleFillUp-ENRG-Test]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'FuelMuleFillUp-ENRG-Test', FILENAME = N'D:\rdsdbdata\DATA\FuelMuleFillUp-ENRG-Test.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+ LOG ON 
+( NAME = N'FuelMuleFillUp-ENRG-Test_log', FILENAME = N'D:\rdsdbdata\DATA\FuelMuleFillUp-ENRG-Test_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET COMPATIBILITY_LEVEL = 140
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [FuelMuleFillUp-ENRG-Test].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET  DISABLE_BROKER 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET RECOVERY FULL 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET  MULTI_USER 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET QUERY_STORE = OFF
+GO
+USE [FuelMuleFillUp-ENRG-Test]
+GO
+/****** Object:  User [admin]    Script Date: 1/18/2022 5:48:19 PM ******/
+CREATE USER [admin] FOR LOGIN [admin] WITH DEFAULT_SCHEMA=[dbo]
+GO
+ALTER ROLE [db_owner] ADD MEMBER [admin]
+GO
+/****** Object:  Table [dbo].[__EFMigrationsHistory]    Script Date: 1/18/2022 5:48:20 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[__EFMigrationsHistory](
+	[MigrationId] [nvarchar](150) NOT NULL,
+	[ProductVersion] [nvarchar](32) NOT NULL,
+ CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY CLUSTERED 
+(
+	[MigrationId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[AspNetRoleClaims]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[AspNetRoleClaims](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[RoleId] [nvarchar](450) NOT NULL,
+	[ClaimType] [nvarchar](max) NULL,
+	[ClaimValue] [nvarchar](max) NULL,
+ CONSTRAINT [PK_AspNetRoleClaims] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[AspNetRoles]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[AspNetRoles](
+	[Id] [nvarchar](450) NOT NULL,
+	[Name] [nvarchar](256) NULL,
+	[NormalizedName] [nvarchar](256) NULL,
+	[ConcurrencyStamp] [nvarchar](max) NULL,
+ CONSTRAINT [PK_AspNetRoles] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[AspNetUserClaims]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[AspNetUserClaims](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[UserId] [nvarchar](450) NOT NULL,
+	[ClaimType] [nvarchar](max) NULL,
+	[ClaimValue] [nvarchar](max) NULL,
+ CONSTRAINT [PK_AspNetUserClaims] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[AspNetUserLogins]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[AspNetUserLogins](
+	[LoginProvider] [nvarchar](450) NOT NULL,
+	[ProviderKey] [nvarchar](450) NOT NULL,
+	[ProviderDisplayName] [nvarchar](max) NULL,
+	[UserId] [nvarchar](450) NOT NULL,
+ CONSTRAINT [PK_AspNetUserLogins] PRIMARY KEY CLUSTERED 
+(
+	[LoginProvider] ASC,
+	[ProviderKey] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[AspNetUserRoles]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[AspNetUserRoles](
+	[UserId] [nvarchar](450) NOT NULL,
+	[RoleId] [nvarchar](450) NOT NULL,
+ CONSTRAINT [PK_AspNetUserRoles] PRIMARY KEY CLUSTERED 
+(
+	[UserId] ASC,
+	[RoleId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[AspNetUsers]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[AspNetUsers](
+	[Id] [nvarchar](450) NOT NULL,
+	[UserName] [nvarchar](256) NULL,
+	[NormalizedUserName] [nvarchar](256) NULL,
+	[Email] [nvarchar](256) NULL,
+	[NormalizedEmail] [nvarchar](256) NULL,
+	[EmailConfirmed] [bit] NOT NULL,
+	[PasswordHash] [nvarchar](max) NULL,
+	[SecurityStamp] [nvarchar](max) NULL,
+	[ConcurrencyStamp] [nvarchar](max) NULL,
+	[MobileNo] [nvarchar](max) NULL,
+	[PhoneNumber] [nvarchar](max) NULL,
+	[PhoneNumberConfirmed] [bit] NOT NULL,
+	[TwoFactorEnabled] [bit] NOT NULL,
+	[LockoutEnd] [datetimeoffset](7) NULL,
+	[LockoutEnabled] [bit] NOT NULL,
+	[AccessFailedCount] [int] NOT NULL,
+	[Address1] [nvarchar](max) NULL,
+	[Address] [nvarchar](max) NULL,
+	[City] [nvarchar](50) NULL,
+	[Country] [nvarchar](50) NULL,
+	[FirstName] [nvarchar](max) NULL,
+	[LastName] [nvarchar](max) NULL,
+	[OTP] [nvarchar](max) NULL,
+	[OTPCreatedDate] [datetime2](7) NULL,
+	[Role] [nvarchar](max) NULL,
+	[IsActive] [bit] NULL,
+	[CreateDate] [datetime2](7) NULL,
+	[ModifyDate] [datetime2](7) NULL,
+	[Latitude] [nvarchar](50) NULL,
+	[Longitude] [nvarchar](50) NULL,
+	[LisenseNumber] [nvarchar](100) NULL,
+	[LicenseExpiryDate] [nvarchar](100) NULL,
+	[JoiningDate] [nvarchar](100) NULL,
+	[Status] [nvarchar](100) NULL,
+	[IsDeleted] [bit] NULL,
+	[ReferralCode] [varchar](100) NULL,
+ CONSTRAINT [PK_AspNetUsers] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[AspNetUserTokens]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[AspNetUserTokens](
+	[UserId] [nvarchar](450) NOT NULL,
+	[LoginProvider] [nvarchar](450) NOT NULL,
+	[Name] [nvarchar](450) NOT NULL,
+	[Value] [nvarchar](max) NULL,
+ CONSTRAINT [PK_AspNetUserTokens] PRIMARY KEY CLUSTERED 
+(
+	[UserId] ASC,
+	[LoginProvider] ASC,
+	[Name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[CustomerDelivery]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CustomerDelivery](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[CustomerRouteId] [int] NOT NULL,
+	[StatusId] [int] NOT NULL,
+	[VehicleId] [int] NULL,
+	[IsAccepted] [int] NULL,
+	[IsDeleted] [bit] NOT NULL,
+	[CreatedBy] [nvarchar](450) NOT NULL,
+	[CreatedDate] [datetime2](7) NOT NULL,
+	[ModifyBy] [nvarchar](450) NULL,
+	[ModifyDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_CustomerDelivery] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[customerModels]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[customerModels](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](max) NULL,
+	[Mobile] [nvarchar](max) NULL,
+	[Address] [nvarchar](max) NULL,
+	[Email] [nvarchar](max) NULL,
+ CONSTRAINT [PK_customerModels] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[CustomerRoute]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CustomerRoute](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[DriverId] [nvarchar](450) NULL,
+	[RouteId] [int] NOT NULL,
+	[CustomerId] [nvarchar](450) NOT NULL,
+	[IsDeleted] [bit] NULL,
+	[CreatedBy] [nvarchar](100) NULL,
+	[CreatedDate] [datetime2](7) NULL,
+	[ModifyBy] [nvarchar](100) NULL,
+	[ModifyDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_CustomerRoute] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[DeliverySchedule]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[DeliverySchedule](
+	[DeliveryId] [int] IDENTITY(1,1) NOT NULL,
+	[UserId] [uniqueidentifier] NULL,
+	[LicencePlateNumber] [nvarchar](max) NULL,
+	[FuleQty] [nvarchar](max) NULL,
+	[Day] [nvarchar](max) NULL,
+	[IsDelivery] [bit] NULL,
+	[IsPastDelivery] [bit] NULL,
+	[DeliveryDate] [date] NULL,
+	[Status] [nvarchar](max) NULL,
+ CONSTRAINT [PK_DeliverySchedule] PRIMARY KEY CLUSTERED 
+(
+	[DeliveryId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[DeliveryStatus]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[DeliveryStatus](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[StatusName] [nvarchar](10) NOT NULL,
+	[IsDeleted] [bit] NOT NULL,
+	[CreatedBy] [nvarchar](100) NOT NULL,
+	[CreatedDate] [datetime2](7) NOT NULL,
+	[ModifyBy] [nvarchar](100) NULL,
+	[ModifyDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_DeliveryStatus] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Driver]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Driver](
+	[DriverId] [int] IDENTITY(1,1) NOT NULL,
+	[UserName] [nvarchar](max) NULL,
+	[Password] [nvarchar](max) NULL,
+	[DriverName] [nvarchar](max) NULL,
+	[VehicleNo] [nvarchar](max) NULL,
+	[Address] [nvarchar](max) NULL,
+	[VehicleExpiryDate] [nvarchar](max) NULL,
+	[MobileNo] [int] NOT NULL,
+	[ModifyBy] [nvarchar](max) NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedDate] [datetime2](7) NOT NULL,
+	[IsActive] [bit] NOT NULL,
+ CONSTRAINT [PK_Driver] PRIMARY KEY CLUSTERED 
+(
+	[DriverId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[FaqAnswer]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[FaqAnswer](
+	[AnswerId] [int] IDENTITY(1,1) NOT NULL,
+	[FaqId] [int] NULL,
+	[Answer] [nvarchar](max) NULL,
+	[CreatedOn] [datetime2](7) NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[IsDeleted] [bit] NULL,
+	[IsActive] [bit] NULL,
+ CONSTRAINT [PK_FaqAnswer] PRIMARY KEY CLUSTERED 
+(
+	[AnswerId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[FAQs]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[FAQs](
+	[FaqId] [int] IDENTITY(1,1) NOT NULL,
+	[Question] [nvarchar](max) NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedOn] [datetime2](7) NULL,
+	[IsDeleted] [bit] NULL,
+	[IsActive] [bit] NULL,
+ CONSTRAINT [PK_FAQs] PRIMARY KEY CLUSTERED 
+(
+	[FaqId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Payment]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Payment](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Userid] [nvarchar](450) NULL,
+	[TransactionId] [int] NULL,
+	[Amount] [money] NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedOn] [datetime2](7) NULL,
+	[ModifyBy] [nvarchar](max) NULL,
+	[ModifyOn] [datetime2](7) NULL,
+	[IsDeleted] [bit] NULL,
+ CONSTRAINT [PK_Payment] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Registration]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Registration](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[UserName] [nvarchar](max) NOT NULL,
+	[Password] [nvarchar](max) NOT NULL,
+	[FirstName] [nvarchar](max) NOT NULL,
+	[LastName] [nvarchar](max) NOT NULL,
+	[Address] [nvarchar](max) NULL,
+	[MobileNo] [nvarchar](max) NULL,
+ CONSTRAINT [PK_Registration] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Route]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Route](
+	[RouteId] [int] IDENTITY(1,1) NOT NULL,
+	[Source] [nvarchar](50) NULL,
+	[Destination] [nvarchar](50) NULL,
+ CONSTRAINT [PK_Route] PRIMARY KEY CLUSTERED 
+(
+	[RouteId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[RouteDetails]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[RouteDetails](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[RouteName] [nvarchar](50) NULL,
+	[DriverId] [nvarchar](450) NULL,
+	[SourceLatitude] [nvarchar](50) NULL,
+	[SourceLongitude] [nvarchar](50) NULL,
+	[DestinationLatitude] [nvarchar](50) NULL,
+	[DestinationLongitude] [nvarchar](50) NULL,
+	[SourceAddress] [nvarchar](50) NULL,
+	[DestinationAddress] [nvarchar](50) NULL,
+	[DeliveryType] [nvarchar](100) NOT NULL,
+	[IsDeleted] [bit] NULL,
+	[CreatedBy] [nvarchar](100) NULL,
+	[CreatedDate] [datetime2](7) NULL,
+	[ModifyBy] [nvarchar](100) NULL,
+	[ModifyDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_RouteDetails] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ScheduleStatus]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ScheduleStatus](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[StatusName] [nvarchar](10) NOT NULL,
+	[IsDeleted] [bit] NOT NULL,
+	[CreatedBy] [nvarchar](100) NOT NULL,
+	[CreatedDate] [datetime2](7) NOT NULL,
+	[ModifyBy] [nvarchar](100) NULL,
+	[ModifyDate] [datetime2](7) NULL,
+ CONSTRAINT [PK_ScheduleStatus] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblAddCustomerVehicles]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblAddCustomerVehicles](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[UserId] [uniqueidentifier] NOT NULL,
+	[LicencePlateNumber] [nvarchar](max) NULL,
+	[Color] [nvarchar](max) NULL,
+	[MakeName] [nvarchar](max) NULL,
+	[TankSize] [nvarchar](max) NULL,
+	[ModelName] [nvarchar](max) NULL,
+	[ParkingNumber] [nvarchar](max) NULL,
+	[DeliveryDate] [datetime2](7) NOT NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedOn] [datetime2](7) NOT NULL,
+	[ModifyBy] [nvarchar](max) NULL,
+	[ModifyOn] [datetime2](7) NULL,
+	[IsActive] [bit] NOT NULL,
+	[IsDeleted] [bit] NOT NULL,
+ CONSTRAINT [PK_tblAddCustomerVehicles] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblCustomberOrderDeatils]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblCustomberOrderDeatils](
+	[FirstName] [nvarchar](450) NOT NULL,
+	[LastName] [nvarchar](max) NULL,
+	[Address] [nvarchar](max) NULL,
+	[MobileNo] [nvarchar](max) NULL,
+	[OrderId] [int] NOT NULL,
+	[ProductName] [nvarchar](max) NULL,
+	[Quantity] [int] NOT NULL,
+	[Price] [int] NOT NULL,
+	[Unit] [int] NOT NULL,
+	[Email] [nvarchar](max) NULL,
+ CONSTRAINT [PK_tblCustomberOrderDeatils] PRIMARY KEY CLUSTERED 
+(
+	[FirstName] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblDriverModel]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblDriverModel](
+	[DriverId] [int] IDENTITY(1,1) NOT NULL,
+	[UserName] [nvarchar](max) NULL,
+	[Password] [nvarchar](max) NULL,
+	[DriverName] [nvarchar](max) NULL,
+	[VehicleNo] [nvarchar](max) NULL,
+	[Address] [nvarchar](max) NULL,
+	[VehicleExpiryDate] [nvarchar](max) NULL,
+	[MobileNo] [int] NOT NULL,
+	[CreatedDate] [datetime2](7) NULL,
+	[ModifyBy] [nvarchar](50) NULL,
+	[CreatedBy] [nvarchar](50) NULL,
+	[IsActive] [bit] NULL,
+ CONSTRAINT [PK_tblDriverModel] PRIMARY KEY CLUSTERED 
+(
+	[DriverId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblEditCustomerDeatils]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblEditCustomerDeatils](
+	[id] [nvarchar](450) NOT NULL,
+	[FirstName] [nvarchar](max) NULL,
+	[LastName] [nvarchar](max) NULL,
+	[Address] [nvarchar](max) NULL,
+	[MobileNo] [nvarchar](max) NULL,
+	[City] [nvarchar](max) NULL,
+	[Country] [nvarchar](max) NULL,
+ CONSTRAINT [PK_tblEditCustomerDeatils] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tblOrders]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tblOrders](
+	[ProductId] [int] IDENTITY(1,1) NOT NULL,
+	[ProductName] [nvarchar](max) NULL,
+	[Quantity] [int] NOT NULL,
+	[Unit] [int] NOT NULL,
+	[Price] [decimal](18, 2) NOT NULL,
+	[DeliveryAddress] [nvarchar](max) NULL,
+	[ModifyBy] [nvarchar](max) NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedDate] [datetime2](7) NOT NULL,
+	[IsActive] [bit] NOT NULL,
+	[CustomerOrderId] [int] NULL,
+ CONSTRAINT [PK_tblOrders] PRIMARY KEY CLUSTERED 
+(
+	[ProductId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Trucks]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Trucks](
+	[TruckId] [int] IDENTITY(1,1) NOT NULL,
+	[LicencePlateNumber] [nvarchar](100) NULL,
+	[TruckColor] [nvarchar](50) NULL,
+	[MakeName] [nvarchar](50) NULL,
+	[TankSize] [nvarchar](50) NULL,
+	[ModelName] [nvarchar](50) NULL,
+	[CreatedOn] [datetime2](7) NULL,
+	[CreatedBy] [nvarchar](50) NULL,
+	[ModifyBy] [nvarchar](50) NULL,
+	[ModifyOn] [datetime2](7) NULL,
+	[IsActive] [bit] NULL,
+	[IsDeleted] [bit] NULL,
+ CONSTRAINT [PK_Trucks] PRIMARY KEY CLUSTERED 
+(
+	[TruckId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[UsersDetails]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UsersDetails](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[UserName] [nvarchar](50) NULL,
+	[Password] [nvarchar](50) NULL,
+	[FirstName] [nvarchar](50) NULL,
+	[LastName] [nvarchar](50) NULL,
+	[Email] [nvarchar](50) NULL,
+	[Address] [nvarchar](50) NULL,
+	[OTP] [int] NULL,
+ CONSTRAINT [PK_UserLoginAndReg] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Vehicles]    Script Date: 1/18/2022 5:48:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Vehicles](
+	[VehicleId] [int] IDENTITY(1,1) NOT NULL,
+	[UserId] [uniqueidentifier] NOT NULL,
+	[LicencePlateNumber] [nvarchar](max) NULL,
+	[Color] [nvarchar](max) NULL,
+	[MakeName] [nvarchar](max) NULL,
+	[TankSize] [nvarchar](max) NULL,
+	[ModelName] [nvarchar](max) NULL,
+	[ParkingNumber] [nvarchar](max) NULL,
+	[DeliveryDate] [datetime2](7) NULL,
+	[CreatedBy] [nvarchar](max) NULL,
+	[CreatedOn] [datetime2](7) NOT NULL,
+	[ModifyBy] [nvarchar](max) NULL,
+	[ModifyOn] [datetime2](7) NULL,
+	[IsActive] [bit] NOT NULL,
+	[IsDeleted] [bit] NOT NULL,
+ CONSTRAINT [PK_Vehicles] PRIMARY KEY CLUSTERED 
+(
+	[VehicleId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_AspNetRoleClaims_RoleId]    Script Date: 1/18/2022 5:48:21 PM ******/
+CREATE NONCLUSTERED INDEX [IX_AspNetRoleClaims_RoleId] ON [dbo].[AspNetRoleClaims]
+(
+	[RoleId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [RoleNameIndex]    Script Date: 1/18/2022 5:48:21 PM ******/
+CREATE UNIQUE NONCLUSTERED INDEX [RoleNameIndex] ON [dbo].[AspNetRoles]
+(
+	[NormalizedName] ASC
+)
+WHERE ([NormalizedName] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_AspNetUserClaims_UserId]    Script Date: 1/18/2022 5:48:21 PM ******/
+CREATE NONCLUSTERED INDEX [IX_AspNetUserClaims_UserId] ON [dbo].[AspNetUserClaims]
+(
+	[UserId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_AspNetUserLogins_UserId]    Script Date: 1/18/2022 5:48:21 PM ******/
+CREATE NONCLUSTERED INDEX [IX_AspNetUserLogins_UserId] ON [dbo].[AspNetUserLogins]
+(
+	[UserId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_AspNetUserRoles_RoleId]    Script Date: 1/18/2022 5:48:21 PM ******/
+CREATE NONCLUSTERED INDEX [IX_AspNetUserRoles_RoleId] ON [dbo].[AspNetUserRoles]
+(
+	[RoleId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [EmailIndex]    Script Date: 1/18/2022 5:48:21 PM ******/
+CREATE NONCLUSTERED INDEX [EmailIndex] ON [dbo].[AspNetUsers]
+(
+	[NormalizedEmail] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UserNameIndex]    Script Date: 1/18/2022 5:48:21 PM ******/
+CREATE UNIQUE NONCLUSTERED INDEX [UserNameIndex] ON [dbo].[AspNetUsers]
+(
+	[NormalizedUserName] ASC
+)
+WHERE ([NormalizedUserName] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[CustomerDelivery] ADD  CONSTRAINT [DF_CustomerDelivery_IsAccepted]  DEFAULT ((0)) FOR [IsAccepted]
+GO
+ALTER TABLE [dbo].[CustomerDelivery] ADD  CONSTRAINT [DF_CustomerDelivery_CreatedBy]  DEFAULT (getdate()) FOR [CreatedBy]
+GO
+ALTER TABLE [dbo].[CustomerDelivery] ADD  CONSTRAINT [DF_CustomerDelivery_CreatedDate]  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+ALTER TABLE [dbo].[CustomerRoute] ADD  CONSTRAINT [DF_CustomerRoute_IsDeleted]  DEFAULT ((0)) FOR [IsDeleted]
+GO
+ALTER TABLE [dbo].[CustomerRoute] ADD  CONSTRAINT [DF_CustomerRoute_CreatedDate]  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+ALTER TABLE [dbo].[DeliveryStatus] ADD  CONSTRAINT [DF_DeliveryStatus_CreatedDate]  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+ALTER TABLE [dbo].[RouteDetails] ADD  CONSTRAINT [DF_RouteDetails_IsDeleted]  DEFAULT ((0)) FOR [IsDeleted]
+GO
+ALTER TABLE [dbo].[RouteDetails] ADD  CONSTRAINT [DF_RouteDetails_CreatedDate]  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+ALTER TABLE [dbo].[ScheduleStatus] ADD  CONSTRAINT [DF_ScheduleStatus_CreatedDate]  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+ALTER TABLE [dbo].[AspNetRoleClaims]  WITH CHECK ADD  CONSTRAINT [FK_AspNetRoleClaims_AspNetRoles_RoleId] FOREIGN KEY([RoleId])
+REFERENCES [dbo].[AspNetRoles] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[AspNetRoleClaims] CHECK CONSTRAINT [FK_AspNetRoleClaims_AspNetRoles_RoleId]
+GO
+ALTER TABLE [dbo].[AspNetUserClaims]  WITH CHECK ADD  CONSTRAINT [FK_AspNetUserClaims_AspNetUsers_UserId] FOREIGN KEY([UserId])
+REFERENCES [dbo].[AspNetUsers] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[AspNetUserClaims] CHECK CONSTRAINT [FK_AspNetUserClaims_AspNetUsers_UserId]
+GO
+ALTER TABLE [dbo].[AspNetUserLogins]  WITH CHECK ADD  CONSTRAINT [FK_AspNetUserLogins_AspNetUsers_UserId] FOREIGN KEY([UserId])
+REFERENCES [dbo].[AspNetUsers] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[AspNetUserLogins] CHECK CONSTRAINT [FK_AspNetUserLogins_AspNetUsers_UserId]
+GO
+ALTER TABLE [dbo].[AspNetUserRoles]  WITH CHECK ADD  CONSTRAINT [FK_AspNetUserRoles_AspNetRoles_RoleId] FOREIGN KEY([RoleId])
+REFERENCES [dbo].[AspNetRoles] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[AspNetUserRoles] CHECK CONSTRAINT [FK_AspNetUserRoles_AspNetRoles_RoleId]
+GO
+ALTER TABLE [dbo].[AspNetUserRoles]  WITH CHECK ADD  CONSTRAINT [FK_AspNetUserRoles_AspNetUsers_UserId] FOREIGN KEY([UserId])
+REFERENCES [dbo].[AspNetUsers] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[AspNetUserRoles] CHECK CONSTRAINT [FK_AspNetUserRoles_AspNetUsers_UserId]
+GO
+ALTER TABLE [dbo].[AspNetUserTokens]  WITH CHECK ADD  CONSTRAINT [FK_AspNetUserTokens_AspNetUsers_UserId] FOREIGN KEY([UserId])
+REFERENCES [dbo].[AspNetUsers] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[AspNetUserTokens] CHECK CONSTRAINT [FK_AspNetUserTokens_AspNetUsers_UserId]
+GO
+ALTER TABLE [dbo].[CustomerRoute]  WITH CHECK ADD  CONSTRAINT [FK_CustomerRoute_CustomerRoute] FOREIGN KEY([Id])
+REFERENCES [dbo].[CustomerRoute] ([Id])
+GO
+ALTER TABLE [dbo].[CustomerRoute] CHECK CONSTRAINT [FK_CustomerRoute_CustomerRoute]
+GO
+ALTER TABLE [dbo].[DeliverySchedule]  WITH CHECK ADD  CONSTRAINT [FK_DeliverySchedule_DeliverySchedule] FOREIGN KEY([DeliveryId])
+REFERENCES [dbo].[DeliverySchedule] ([DeliveryId])
+GO
+ALTER TABLE [dbo].[DeliverySchedule] CHECK CONSTRAINT [FK_DeliverySchedule_DeliverySchedule]
+GO
+ALTER TABLE [dbo].[FaqAnswer]  WITH CHECK ADD  CONSTRAINT [FK_FaqAnswer_FaqAnswer] FOREIGN KEY([AnswerId])
+REFERENCES [dbo].[FaqAnswer] ([AnswerId])
+GO
+ALTER TABLE [dbo].[FaqAnswer] CHECK CONSTRAINT [FK_FaqAnswer_FaqAnswer]
+GO
+USE [master]
+GO
+ALTER DATABASE [FuelMuleFillUp-ENRG-Test] SET  READ_WRITE 
+GO
+===========
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.Utilities
+{
+   public static class Mapper
+    {
+        public static T2 MapData<T1, T2>(this T1 source)
+        {
+            if (source == null)
+            {
+                throw new InvalidOperationException("Null refence can not map!");
+            }
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<T1, T2>();
+            });
+
+            var mapper = config.CreateMapper();
+            //Mapper.CreateMap<T1, T2>();
+            T2 obj = mapper.Map<T1, T2>(source);
+            return obj;
+        }
+
+        public static List<T2> MapDataList<T1, T2>(this List<T1> source)
+        {
+            if (source == null)
+            {
+                throw new InvalidOperationException("Null refence can not map!");
+            }
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<T1, T2>();
+            });
+            var mapper = config.CreateMapper();
+            //Mapper.CreateMap<T1, T2>();
+            List<T2> objList = mapper.Map<List<T1>, List<T2>>(source);
+            return objList;
+        }
+
+    }
+}
+===========
+
+
+using FuelMuleFillUp.Models;
+using FuelMuleFillUp.Models.Models;
+using FuelMuleFillUp.Models.RequestModel;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.BAL.IRepository
+{
+    public interface IUserBal
+    {
+        Task<CommonResponseModel> UserRegistration(UserDto user);
+        
+        Task<CommonResponseModel> UpdateUser(UserUpdateRequestModel user);
+       
+        Task<CommonResponseModel> GetUsers(string role, int? userId);
+        Task<CommonResponseModel> UserLogin(string email, string password, string deviceToken, string deviceId, SymmetricSecurityKey key);
+        Task<CommonResponseModel> GetRoles(int? id);
+        Task<CommonResponseModel> DeleteEmployee(int UserId);
+    }
+}
+=============
+using FuelMuleFillUp.Entities.Models;
+using FuelMuleFillUp.Models;
+using FuelMuleFillUp.Models.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.DAL.IDAL
+{
+    public interface IUserDal
+    {
+
+        Task<bool> UserRegistration(AspNetUser user);
+        bool FindUserWithEmail(string email, int userid);
+        Task<List<AspNetUser>> GetUsers(string role, int? userId);
+        Task<List<AspNetUser>> GetUsersByIds(int[] userIds);
+        Task<AspNetUser> UserLogin(string email, string password);
+        Task<List<AspNetRole>> GetRoles(int? id);
+    }
+}
+=========
+using AutoMapper;
+using FuelMuleFillUp.BAL.IRepository;
+using FuelMuleFillUp.DAL.IDAL;
+using FuelMuleFillUp.Entities.Models;
+using FuelMuleFillUp.Models;
+using FuelMuleFillUp.Models.Models;
+using FuelMuleFillUp.Models.RequestModel;
+using FuelMuleFillUp.Utilities;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Security;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Net;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FuelMuleFillUp.BAL.Repository
+{
+    public class UserBal : IUserBal
+    {
+        private readonly IUserDal userDal;
+        private readonly IGenericDAL<UserToken> tokenGenericDal;
+        public UtilityFunction utility;
+        public readonly IMapper mapper;
+        private readonly IGenericDAL<AspNetUser> userGenericDal;
+        private readonly ILogger<UserBal> _logger;
+
+        /// <summary>
+        /// UserBal class
+        /// </summary>
+        /// <param name="userDal"></param>
+        public UserBal(IUserDal userDal, IGenericDAL<UserToken> tokenGenericDal, IMapper mapper, IGenericDAL<AspNetUser> userGenericDal, ILogger<UserBal> _logger)
+        {
+            this.userDal = userDal;
+            this.tokenGenericDal = tokenGenericDal;
+            this.mapper = mapper;
+            this.userGenericDal = userGenericDal;
+            this._logger = _logger;
+
+        }
+
+        /// <summary>
+        /// GenrateReferralRandomCode
+        /// </summary>
+        /// <returns></returns>
+        public string GenrateReferralRandomCode()
+        {
+            char[] chars = "abcdefghijklmnopqrstuvwxyz1234567890".ToCharArray();
+            StringBuilder sb = new(); //StringBuilder
+            Random random = new SecureRandom();
+            for (int i = 0; i < 6; i++)
+            {
+                char c = chars[random.Next(chars.Length)];
+                sb.Append(c);
+            }
+            String output = sb.ToString();
+            return output;
+        }
+
+        /// <summary>
+        /// User Registration - save user - customer, employee and driver
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> UserRegistration(UserDto user)
+        {
+            utility = new UtilityFunction();
+            CommonResponseModel response = new();
+            try
+            {
+               
+                user.ReferralCode = GenrateReferralRandomCode();
+                if (user.RouteId == 0)
+                {
+                    user.RouteId = null;
+                }
+              //  var hashsalt = EncryptPassword(user.PasswordHash);
+               // user.PasswordHash = hashsalt;
+                var emailExists = userDal.FindUserWithEmail(user.Email, user.Id);
+
+                response = await utility.DuplicateResponse(emailExists);
+
+                if (response.Message != "Already Exists")
+                {
+                    var userInfo = mapper.Map<AspNetUser>(user);
+                    var result = await userDal.UserRegistration(userInfo);
+                    user.Id = userInfo.Id;
+                    response = await utility.ResponseMessage(result, user);
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+        /// <summary>
+        /// Update User
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> UpdateUser(UserUpdateRequestModel user)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var entityUser = (await userDal.GetUsers(null, user.Id)).FirstOrDefault();
+                entityUser.FirstName = user.FirstName;
+                entityUser.LastName = user.LastName;
+                entityUser.Address1 = user.Address1;
+                entityUser.Address = user.Address;
+                entityUser.City = user.City;
+                entityUser.Country = user.Country;
+                entityUser.MobileNo = user.MobileNo;
+               
+
+                var res = await userGenericDal.Save(entityUser);
+                if (res != null)
+                {
+                    response.Data = entityUser.Id;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.AddUpdate;
+                }
+                else
+
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.invalid;
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+
+        
+
+        /// <summary>
+        /// Get user details
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetUsers(string role, int? userId)
+        {
+            utility = new UtilityFunction();
+            CommonResponseModel response = new();
+            try
+            {
+
+                var usersList = await userDal.GetUsers(role, userId);
+
+                var users = mapper.Map<List<UserDto>>(usersList);
+                users.ForEach(user => user.SubscriptionId = usersList.FirstOrDefault(x => x.Id == user.Id).AssignSubscriptions.Any() ?
+                            user.SubscriptionId = usersList.FirstOrDefault(x => x.Id == user.Id).AssignSubscriptions.FirstOrDefault().PlanId : null);
+
+                if (usersList != null)
+                {
+                    response.Data = users;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.GetData;
+
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Get roles
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<CommonResponseModel> GetRoles(int? id)
+        {
+            utility = new UtilityFunction();
+            CommonResponseModel response = new();
+            try
+            {
+                var usersList = await userDal.GetRoles(id);
+
+                if (usersList != null)
+                {
+                    response.Data = usersList;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.GetData;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// User login
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        /// 
+        public class UserVerify
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string Password { get; set; }
+            public byte[] StoredSalt { get; set; }
+            
+        }
+        UserVerify verify = new UserVerify();
+        public string EncryptPassword(string password)
+        {
+            // Encrypt password
+            byte[] salt = new byte[128 / 8]; // Generate a 128-bit salt using a secure PRNG
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(salt);
+            }
+
+            string encryptedPassw = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: password,
+                salt: salt,
+                prf: KeyDerivationPrf.HMACSHA1,
+                iterationCount: 10000,
+                numBytesRequested: 256 / 8
+            ));
+            return encryptedPassw;
+        }
+
+        public bool VerifyPassword(string password, byte[] salt, string PasswordHash)
+        {
+            //string encryptedPassw = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+            string encryptedPassw = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: password,
+                salt: salt,
+                prf: KeyDerivationPrf.HMACSHA1,
+                iterationCount: 10000,
+                numBytesRequested: 256 / 8
+            ));
+            return encryptedPassw == PasswordHash;
+        }
+
+
+        public async Task<CommonResponseModel> UserLogin(string email, string password, string deviceToken, string deviceId, SymmetricSecurityKey key)
+        {
+            utility = new UtilityFunction();
+            CommonResponseModel response = new();
+            try
+            {
+                var user = await userDal.UserLogin(email, password);
+               // var vaildatepwd = user.PasswordHash;
+               
+                //  var user = _context.Users.FirstOrDefault(u => u.Name == loginUser.Name);
+                //var isPasswordMatched = VerifyPassword(loginUser.Password, user.StoredSalt, user.Password);
+                //var isPasswordMatched = VerifyPassword(password, user.PasswordHash);
+                //if (isPasswordMatched)
+                //{
+                //    //Login Successfull
+                //}
+                //else
+                //{
+                //    //Login Failed
+                //}
+
+                if (user != null && user.Id > 0)
+                {
+                    await tokenGenericDal.Save(new UserToken()
+                    {
+                        Id = user.UserTokens.Any(x => x.DeviceId == deviceId) ? user.UserTokens.FirstOrDefault(x => x.DeviceId == deviceId).Id : 0,
+                        DeviceToken = deviceToken,
+                        DeviceId = deviceId,
+                        AspNetUserId = user.Id,
+                        CreatedBy = user.Id
+                    });
+
+                    user.UserTokens = null;
+
+                    string retToken;
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    //3. Create JETdescriptor
+                    var tokenDescriptor = new SecurityTokenDescriptor()
+                    {
+                        Subject = new ClaimsIdentity(
+                            new Claim[]
+                            {
+                                new Claim(ClaimTypes.Name, email),
+                                new Claim(ClaimTypes.Role, user.RoleId.ToString())
+
+                            }),
+                        Expires = DateTime.Now.AddDays(365),
+                        SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature),
+                    };
+                    //4. Create Token
+                    var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                    // 5. Return Token from method
+                    retToken = tokenHandler.WriteToken(token);
+                    var userDto = mapper.Map<UserDto>(user);
+
+                    userDto.AccessToken = retToken;
+                    userDto.RoleName = user.Role.Name;
+
+                    response.Data = userDto;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.login;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.Msgvalidpwd;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<CommonResponseModel> DeleteEmployee(int UserId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var admins = await userDal.GetUsers("Admin", null);
+                var users = await userDal.GetUsersByIds(new int[] { UserId });
+                if(!admins.Any(x => x.Id != UserId))
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.Msgadmin;
+                }
+                else if (users != null && users.Count > 0)
+                {
+                    var user = users.Where(x => x.IsDeleted == false).FirstOrDefault();
+                    user.IsDeleted = true;
+                    await userGenericDal.Save(user);
+                    response.Data = true;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = TKMessages.DeleteRecord;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response.Message = TKMessages.NotExist;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = TKMessages.CommonFailed;
+                _logger.LogError(ex.Message);
+            }
+            return response;
+        }
+
+
+    }
+}
+==
