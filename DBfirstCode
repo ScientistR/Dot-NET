@@ -1,4 +1,8 @@
-Scaffold-DbContext "Server=APPLE\SQLEXPRESS;Database=Mega_Services;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models
+Create------ Scaffold-DbContext "Server=APPLE\SQLEXPRESS;Database=Mega_Services;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models
+
+Update --------- Scaffold-DbContext "Server=APPLE\SQLEXPRESS;Database=Mydatabse;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Force
+
+
 
 Install Packeage
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0-preview.2.20120.8" />
