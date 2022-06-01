@@ -1,0 +1,209 @@
+---Dal---Get-------
+
+ public async Task<List<Vehicle>> GetVehicel(int? VihicleId)
+        {
+            var VehiclesList = await DbContext.Vehicles.Where(x => (x.Id == VihicleId || VihicleId == null) && !x.IsDeleted).ToListAsync();
+            return VehiclesList;
+        }
+Task<List<Vehicle>> GetVehicel(int? VihicleId);--> Interface dal ka	
+-----Bal---Get----------
+				private readonly IAdminDal IadminDal;
+        private readonly IMapper imapper;
+        public AdminBal(IAdminDal IadminDal, IMapper imapper) -->Contructor
+        {
+            this.IadminDal = IadminDal;
+            this.imapper = imapper;
+        }
+				
+ public async Task<CommonResponseModel> GetVehicel(int? VihicleId)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                var ListVehicel = await IadminDal.GetVehicel(VihicleId);
+                if (ListVehicel != null)
+                {
+                    response.Data = ListVehicel;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = "List";//TKMessages.GetData;
+                }
+                else
+                {
+                    response.Data = null;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = "Not Found";//TKMessages.GetData;
+                }
+----------------Add	Controller-------------
+        private readonly ICustomerBal IcustomerBal;
+        public CusomerController(ICustomerBal IcustomerBal)
+        {
+            this.IcustomerBal = IcustomerBal;
+        }
+				
+        #region Add Update GetRole
+         [Route("AddUpdateVehicle")]
+         [HttpPost]
+         public async Task<IActionResult> AddUpdateVehicle(VehicleDto vehicle)
+        {
+             CommonResponseModel responseModel = await IcustomerBal.AddUpdateVehicle(vehicle);
+             return Ok(responseModel);
+         }
+        #endregion
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = "List";//TKMessages.GetData;
+            }
+
+            return response;
+        }
+Task<CommonResponseModel> GetVehicel(int? VihicleId);-->InterFace
+---------Controller ----Get----------------
+ 				public readonly IAdminBal IadminBal;
+        public AdminController(IAdminBal IadminBal)--> Contructor
+        {
+            this.IadminBal = IadminBal;
+        }
+				
+ 				#region GetVehicel
+        [Route("GetVehicel")]
+        [HttpGet]
+        public async Task<IActionResult> GetVehicel(int? VihicleId)
+        {
+            CommonResponseModel responseModel = await IadminBal.GetVehicel(VihicleId);
+            return Ok(responseModel);
+        }
+        #endregion
+-------Bal---Add Insert------
+    private readonly IGenericDAL<Vehicle> vehivcleIGenericDal; // har model k liye alag generic or Enitity Pass hogi
+	  private readonly IMapper mapper; // ye Imapper Interface automapper k andar hai ..hum ne Imapper ka interfce nhi bnaya
+ 
+ public CustomerBal(IGenericDAL<Vehicle> vehivcleIGenericDal, IMapper mapper )
+        {
+       
+            this.vehivcleIGenericDal = vehivcleIGenericDal;
+            this.mapper = mapper;
+       
+        }
+public async Task<CommonResponseModel> AddUpdateVehicle(VehicleDto vehicle)
+        {
+            CommonResponseModel response = new();
+            try
+            {
+                if(vehicle.Id>0)
+                {
+                    var veh = mapper.Map<Vehicle>(vehicle);
+                    var EntiTy = await vehivcleIGenericDal.Save(veh);
+                    response.Data = EntiTy;
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.Message = "Update sucessfull";
+                }
+                else 
+                {
+                   var list = await IadminDal.GetVehicel(null);
+                   var aleady=list.Any(x=>x.LicencePlateNumber== vehicle.LicencePlateNumber);
+                    if (aleady)
+                    {
+                        response.Data = null;
+                        response.Message = "Already Exist";
+                    }
+                    else {
+
+                        var veh = mapper.Map<Vehicle>(vehicle);
+                        var EntiTy = await vehivcleIGenericDal.Save(veh);
+                        response.Data = EntiTy;
+                        response.StatusCode = (int)HttpStatusCode.OK;
+                        response.Message = "Save";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Data = null;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+------Mapper -------
+ public class AutoMapperProfile : AutoMapper.Profile
+    {
+        public AutoMapperProfile()
+        {
+            CreateMap<VehicleDto, Vehicle>()
+               .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
+               .ReverseMap();
+			 }
+}
+-----Add--Interface Genric--- Dal-------------
+ public interface IGenericDAL<T>
+    {
+        Task<bool> Save(T model);
+        Task<bool> ListSave(List<T> model);
+        Task<bool> Delete(T model);
+    }
+		--------Add--Dal Generic ----
+		public class GenericDAL<T> : IGenericDAL<T> where T : class
+    {
+
+        private readonly OilFuelMulContext dbContext;
+
+        public GenericDAL(OilFuelMulContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+
+
+        // Add / Update 
+        public async Task<bool> Save(T model)
+        {
+            try
+            {
+                dbContext.Set<T>().Update(model);
+                return await dbContext.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> ListSave(List<T> model)
+        {
+            try
+            {
+                using (dbContext)
+                {
+                    dbContext.Set<T>().UpdateRange(model);
+                    return await dbContext.SaveChangesAsync() > 0;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                dbContext.Dispose();
+            }
+        }
+
+        public async Task<bool> Delete(T model)
+        {
+            try
+            {
+                using (dbContext)
+                {
+                    dbContext.Set<T>().Remove(model);
+                    return await dbContext.SaveChangesAsync() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
